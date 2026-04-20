@@ -283,7 +283,7 @@
                                 Imprimir timeline
                             </button>
                         </div>
-                        <div id="timeline-embed" class="timeline bg-white p-3 p-md-4" data-mode="vertical" data-vertical-start-position="right" data-vertical-trigger="150px">
+                        <div id="timeline-embed" class="timeline bg-white p-3 p-md-4" data-mode="vertical" data-vertical-start-position="left" data-vertical-trigger="150px">
                             <div class="timeline__wrap">
                                 <div id="vertical-timeline-list" class="timeline__items"></div>
                             </div>
@@ -681,7 +681,7 @@
             if (typeof timeline === 'function') {
                 timelineInstance = timeline(document.querySelectorAll('.timeline'), {
                     mode: 'vertical',
-                    verticalStartPosition: 'right',
+                    verticalStartPosition: 'left',
                     verticalTrigger: '150px'
                 });
             }
