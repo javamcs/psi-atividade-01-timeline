@@ -3,272 +3,630 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sua Timeline Interativa</title>
-    <!-- CSS do TimelineJS -->
-    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
-    <!-- Biblioteca Papa Parse para ler CSV -->
+    <title>Teóricos da Psicologia — linha do tempo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .vertical-timeline-wrap {
+            max-height: min(70vh, 42rem);
+            overflow-y: auto;
+        }
+        .vertical-timeline {
+            position: relative;
             margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            padding: 0 0 0 5.5rem;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
+        .vertical-timeline::before {
+            content: '';
+            position: absolute;
+            left: 4.35rem;
+            top: 0.35rem;
+            bottom: 0.35rem;
+            width: 2px;
+            background: var(--bs-border-color);
         }
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-            background: #f9f9f9;
+        .vertical-timeline-item {
+            position: relative;
+            list-style: none;
+            padding-bottom: 1.35rem;
         }
-        .tab-button {
-            padding: 15px 25px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 16px;
-            font-weight: bold;
-            transition: 0.3s;
+        .vertical-timeline-item:last-child {
+            padding-bottom: 0;
         }
-        .tab-button.active {
-            background: white;
-            border-bottom: 3px solid #007bff;
-            color: #007bff;
+        .vertical-timeline-year {
+            position: absolute;
+            left: 0;
+            top: 0.15rem;
+            width: 3.85rem;
+            text-align: right;
+            font-weight: 700;
+            font-size: 1.05rem;
+            line-height: 1.2;
+            color: var(--bs-primary);
         }
-        .tab-content {
-            display: none;
-            padding: 20px;
+        .vertical-timeline-dot {
+            position: absolute;
+            left: 3.78rem;
+            top: 0.45rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bs-primary);
+            border: 2px solid var(--bs-body-bg);
+            box-shadow: 0 0 0 1px var(--bs-border-color);
+            z-index: 1;
         }
-        .tab-content.active {
-            display: block;
+        .vertical-timeline-card {
+            margin-left: 1.35rem;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .vertical-timeline-card .vt-body :last-child {
+            margin-bottom: 0;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-            vertical-align: top;
+        .vertical-timeline-card .vt-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.25rem;
         }
-        th {
-            background-color: #007bff;
-            color: white;
+        .table-sticky thead th {
             position: sticky;
             top: 0;
+            z-index: 2;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        #timeline-embed {
-            height: 600px;
+        .table-data-psi {
             width: 100%;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
+            margin-bottom: 0;
         }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
+        .table-data-psi th.col-corrente,
+        .table-data-psi td.col-corrente,
+        .table-data-psi th.col-figura,
+        .table-data-psi td.col-figura {
+            min-width: 10rem;
+            max-width: 16rem;
+            word-break: break-word;
         }
-        .error {
-            color: red;
-            text-align: center;
-            padding: 20px;
-            background: #ffeeee;
-            margin: 20px;
-            border-radius: 5px;
+        .table-data-psi th.col-data,
+        .table-data-psi td.col-data {
+            min-width: 5.5rem;
+            font-size: 0.875rem;
+            line-height: 1.3;
+            vertical-align: top;
+        }
+        .table-data-psi th.col-data {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            line-height: 1.2;
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+        }
+        .table-data-psi th.col-texto,
+        .table-data-psi td.col-texto,
+        .table-data-psi th.col-citacao,
+        .table-data-psi td.col-citacao {
+            min-width: 16rem;
+            max-width: 22rem;
+            font-size: 0.8125rem;
+            line-height: 1.45;
+            word-break: break-word;
+            vertical-align: top;
+        }
+        .table-data-psi th.col-extra,
+        .table-data-psi td.col-extra {
+            min-width: 8rem;
+            word-break: break-word;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="tabs">
-            <button class="tab-button active" onclick="switchTab(event, 'timeline')">📅 Linha do Tempo</button>
-            <button class="tab-button" onclick="switchTab(event, 'table')">📊 Tabela de Dados</button>
-        </div>
-        <div id="timeline" class="tab-content active">
-            <div id="timeline-embed"></div>
-        </div>
-        <div id="table" class="tab-content">
-            <div id="table-content"></div>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-0 px-0">
+                <div class="px-3 pt-3 pb-2">
+                    <h1 class="h5 mb-1">Teóricos da Psicologia</h1>
+                    <p id="planilha-link-wrap" class="small mb-0">
+                        <a id="link-planilha" href="#" target="_blank" rel="noopener noreferrer" class="link-primary">Abrir planilha de dados</a>
+                    </p>
+                </div>
+                <ul class="nav nav-tabs px-3 pt-1 border-bottom-0" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline-pane" type="button" role="tab" aria-controls="timeline-pane" aria-selected="true">Linha do tempo</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-pane" type="button" role="tab" aria-controls="table-pane" aria-selected="false">Tabela</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content" id="mainTabContent">
+                    <div class="tab-pane fade show active p-3" id="timeline-pane" role="tabpanel" aria-labelledby="timeline-tab" tabindex="0">
+                        <div id="timeline-embed" class="vertical-timeline-wrap border rounded bg-white p-3 p-md-4">
+                            <ol id="vertical-timeline-list" class="vertical-timeline mb-0"></ol>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade p-3" id="table-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+                        <div id="table-content"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <template id="timeline-item-template">
+        <li class="vertical-timeline-item">
+            <span class="vertical-timeline-year js-vt-year"></span>
+            <span class="vertical-timeline-dot" aria-hidden="true"></span>
+            <article class="card vertical-timeline-card border-0 shadow-sm">
+                <div class="card-body">
+                    <figure class="vt-figure mb-3 d-none">
+                        <img class="img-fluid rounded js-vt-img" alt="">
+                    </figure>
+                    <div class="vt-body small">
+                        <p class="mb-2 text-body-secondary"><strong class="text-body">Corrente psicológica:</strong> <span class="js-vt-corrente"></span></p>
+                        <p class="mb-2 text-body-secondary"><strong class="text-body">Autor:</strong> <span class="js-vt-autor"></span></p>
+                        <p class="mb-2 text-body-secondary"><strong class="text-body">Ano:</strong> <span class="js-vt-ano"></span></p>
+                        <p class="mb-1 text-body fw-semibold">Ideias:</p>
+                        <div class="mb-0 text-body-secondary js-vt-ideias"></div>
+                        <p class="mb-1 mt-3 text-body fw-semibold">Referência</p>
+                        <div class="mb-0 text-body-secondary small js-vt-ref"></div>
+                    </div>
+                </div>
+            </article>
+        </li>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        // 🔧 COLOQUE O SEU LINK DO GOOGLE SHEETS (PUBLICADO COMO CSV) AQUI
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBLCU1xQeNk3vWC31Ezn7i6GdekRUrDik751Zbp5nKzA2NlmUqOVec6daZySyNevB39YCVJDHp8wya/pub?gid=1638839728&single=true&output=csv';
 
         let rawData = [];
 
-        // Função para alternar abas
-        window.switchTab = function(event, tabId) {
-            // Esconde todos os conteúdos
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            // Remove active de todos os botões
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            // Mostra o selecionado
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+        function spreadsheetViewUrlFromCsvUrl(csvUrl) {
+            return String(csvUrl)
+                .replace(/\/pub\?/i, '/pubhtml?')
+                .replace(/[?&]output=csv\b/i, '')
+                .replace(/\?&/g, '?')
+                .replace(/&&/g, '&')
+                .replace(/[?&]$/, '');
         }
 
-        // Função para converter os dados da planilha no formato que o TimelineJS entende
-        function convertToTimelineFormat(data) {
-            // Mapeia os cabeçalhos para encontrar as colunas certas (case insensitive)
-            const headers = data[0].map(h => h.toLowerCase());
-            
-            const titleIndex = headers.findIndex(h => h.includes('titulo') || h.includes('title') || h === 'nome');
-            const dateIndex = headers.findIndex(h => h.includes('data') || h === 'date');
-            const textIndex = headers.findIndex(h => h.includes('descricao') || h.includes('description') || h === 'texto');
-            const mediaIndex = headers.findIndex(h => h.includes('imagem') || h.includes('media') || h.includes('url'));
-            
-            // Se não encontrou colunas essenciais, usa as primeiras como fallback
-            const finalTitleIndex = titleIndex !== -1 ? titleIndex : 0;
-            const finalDateIndex = dateIndex !== -1 ? dateIndex : 1;
-            const finalTextIndex = textIndex !== -1 ? textIndex : 2;
-            const finalMediaIndex = mediaIndex !== -1 ? mediaIndex : 3;
+        function initPlanilhaLink() {
+            const wrap = document.getElementById('planilha-link-wrap');
+            const a = document.getElementById('link-planilha');
+            if (!a || !wrap) return;
+            const u = GOOGLE_SHEET_CSV_URL;
+            if (!u || u === 'SEU_LINK_DO_CSV_AQUI') {
+                wrap.classList.add('d-none');
+                return;
+            }
+            a.href = spreadsheetViewUrlFromCsvUrl(u);
+            wrap.classList.remove('d-none');
+        }
 
-            // Pula o cabeçalho e converte cada linha
-            const timelineEvents = data.slice(1).map(row => {
-                // Extrai só ano, mês e dia se possível (para o TimelineJS)
-                let dateStr = row[finalDateIndex] || '';
-                let year = '', month = '', day = '';
-                // Tenta extrair data no formato YYYY-MM-DD ou DD/MM/YYYY
-                if (dateStr.match(/\d{4}-\d{2}-\d{2}/)) {
-                    let parts = dateStr.split('-');
-                    year = parts[0];
-                    month = parts[1];
-                    day = parts[2];
-                } else if (dateStr.match(/\d{2}\/\d{2}\/\d{4}/)) {
-                    let parts = dateStr.split('/');
-                    year = parts[2];
-                    month = parts[1];
-                    day = parts[0];
+        function loadingHtml(message) {
+            return (
+                '<div class="text-center text-muted py-5">' +
+                '<div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Carregando…</span></div>' +
+                '<p class="mb-0">' + message + '</p>' +
+                '</div>'
+            );
+        }
+
+        function errorHtml(message) {
+            return '<div class="alert alert-danger mb-0" role="alert">' + message + '</div>';
+        }
+
+        function escapeHtml(s) {
+            if (s == null || s === '') return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /**
+         * Colunas: mapeamento por cabeçalho; senão posições padrão (7 ou 6 colunas).
+         */
+        function normHeaderCell(s) {
+            return String(s || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
+        function buildPsychColumnMap(headerRow) {
+            const n = (headerRow || []).map(normHeaderCell);
+            const len = n.length;
+
+            const findIdx = (pred) => {
+                for (let i = 0; i < n.length; i++) {
+                    if (pred(n[i], i)) return i;
+                }
+                return -1;
+            };
+
+            const refIdx = findIdx(h =>
+                /\babnt\b/.test(h) ||
+                h.includes('referencia') ||
+                h.includes('citacao e refer') ||
+                (h.includes('citacao') && h.includes('refer')));
+
+            const citacaoIdx = findIdx((h, i) => {
+                if (i === refIdx) return false;
+                if (h === 'citacao') return true;
+                if (h.includes('citacao') && !h.includes('referencia') && !h.includes('refer')) return true;
+                return false;
+            });
+
+            const ideiasIdx = findIdx((h, i) => {
+                if (i === refIdx || i === citacaoIdx) return false;
+                if (h.includes('ideia')) return true;
+                if (h.includes('contrib')) return true;
+                if (h.includes('descri')) return true;
+                if (h.includes('teoria') && !h.includes('teorico')) return true;
+                if (h === 'texto' || h.startsWith('texto ')) return true;
+                return false;
+            });
+
+            const autorIdx = findIdx(h =>
+                h.includes('autor') ||
+                h.includes('teorico') ||
+                h.includes('figura') ||
+                (h.includes('nome') && !h.includes('primeiro')));
+
+            const correnteIdx = findIdx(h =>
+                h.includes('corrente') ||
+                h.includes('abordagem') ||
+                (h.includes('escola') && !h.includes('ano')));
+
+            const nascIdx = findIdx(h => h.includes('nasc'));
+            const marcoIdx = findIdx(h =>
+                h.includes('marco') ||
+                h.includes('obra') ||
+                h.includes('public') ||
+                h.includes('evento'));
+            const obitoIdx = findIdx(h =>
+                h.includes('obito') ||
+                h.includes('falec') ||
+                h.includes('morte'));
+
+            const anoIdx = findIdx((h, i) => {
+                if (i === refIdx) return false;
+                if (h === 'ano') return true;
+                if (/^ano\b/.test(h) && !h.includes('nasc') && !h.includes('obito') && !h.includes('morte')) return true;
+                return false;
+            });
+
+            const imagemIdx = findIdx(h =>
+                /\b(imagem|foto|midia)\b/.test(h) ||
+                (h === 'url' || h.startsWith('url ')));
+
+            const wide = len >= 7;
+            const defAnoCol = len > 1 && n[1] === 'ano' ? 1 : -1;
+            const defaults = wide
+                ? { corrente: 0, autor: 1, nasc: 2, marco: 3, obito: 4, ideias: 5, citacao: -1, referencia: 6, imagem: len > 7 ? 7 : -1, ano: defAnoCol }
+                : { corrente: -1, autor: 0, nasc: 1, marco: 2, obito: 3, ideias: 4, citacao: -1, referencia: 5, imagem: len > 6 ? 6 : -1, ano: defAnoCol };
+
+            const pick = (idx, def) => (idx >= 0 && idx < len ? idx : def);
+
+            return {
+                corrente: pick(correnteIdx, defaults.corrente),
+                autor: pick(autorIdx, defaults.autor),
+                nasc: pick(nascIdx, defaults.nasc),
+                marco: pick(marcoIdx, defaults.marco),
+                obito: pick(obitoIdx, defaults.obito),
+                ano: pick(anoIdx, defaults.ano),
+                ideias: pick(ideiasIdx, defaults.ideias),
+                citacao: pick(citacaoIdx, defaults.citacao),
+                referencia: pick(refIdx, defaults.referencia),
+                imagem: pick(imagemIdx, defaults.imagem)
+            };
+        }
+
+        function psychCell(row, idx) {
+            if (idx == null || idx < 0) return '';
+            return row[idx] != null ? row[idx] : '';
+        }
+
+        function parseDateParts(dateStr) {
+            dateStr = (dateStr == null ? '' : String(dateStr)).trim();
+            let year = '', month = '', day = '';
+            if (!dateStr) return { year, month, day };
+            if (dateStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+                const p = dateStr.split('-');
+                year = p[0];
+                month = p[1];
+                day = p[2];
+            } else if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+                const p = dateStr.split('/');
+                year = p[2];
+                month = p[1];
+                day = p[0];
+            } else {
+                const m = dateStr.match(/\d{4}/);
+                year = m ? m[0] : '';
+            }
+            return { year, month, day };
+        }
+
+        function nl2brEscaped(s) {
+            return escapeHtml(s).replace(/\r\n|\r|\n/g, '<br>');
+        }
+
+        function parsePsychRow(row, map) {
+            const corIdx = map.corrente;
+            return {
+                corrente: corIdx >= 0 ? String(psychCell(row, corIdx)).trim() : '',
+                autor: String(psychCell(row, map.autor)).trim(),
+                nascRaw: psychCell(row, map.nasc),
+                marcoRaw: psychCell(row, map.marco),
+                obitoRaw: psychCell(row, map.obito),
+                anoRaw: map.ano >= 0 ? psychCell(row, map.ano) : '',
+                ideias: String(psychCell(row, map.ideias)),
+                citacao: map.citacao >= 0 ? String(psychCell(row, map.citacao)) : '',
+                referencia: String(psychCell(row, map.referencia)),
+                mediaUrl: map.imagem >= 0 ? String(psychCell(row, map.imagem)).trim() : ''
+            };
+        }
+
+        function autorVidaLabel(birth, death) {
+            const by = birth.year || '';
+            const dy = death.year || '';
+            if (by && dy) return '(' + by + '-' + dy + ')';
+            if (by) return '(' + by + ')';
+            if (dy) return '(' + dy + ')';
+            return '';
+        }
+
+        function timelineAnchorParts(marco, birth, death) {
+            if (marco.year) return marco;
+            if (birth.year) return birth;
+            if (death.year) return death;
+            return { year: '', month: '', day: '' };
+        }
+
+        function convertToTimelineFormat(data) {
+            const headerRow = data[0] || [];
+            const colMap = buildPsychColumnMap(headerRow);
+
+            const timelineEvents = [];
+
+            data.slice(1).forEach(row => {
+                const p = parsePsychRow(row, colMap);
+                if (!p.autor) return;
+
+                const birth = parseDateParts(p.nascRaw);
+                const marco = parseDateParts(p.marcoRaw);
+                const death = parseDateParts(p.obitoRaw);
+                const anchor = timelineAnchorParts(marco, birth, death);
+                if (!anchor.year) return;
+
+                const mediaUrl = p.mediaUrl;
+
+                const y = parseInt(anchor.year, 10);
+                const vida = autorVidaLabel(birth, death);
+                const autorLinha = vida ? p.autor + ' ' + vida : p.autor;
+                let anoLinha = '';
+                if (p.anoRaw != null && String(p.anoRaw).trim() !== '') {
+                    anoLinha = String(p.anoRaw).trim();
+                } else if (p.marcoRaw != null && String(p.marcoRaw).trim() !== '') {
+                    anoLinha = String(p.marcoRaw).trim();
                 } else {
-                    // Se não encontrou formato específico, tenta pegar só o ano
-                    let yearMatch = dateStr.match(/\d{4}/);
-                    year = yearMatch ? yearMatch[0] : dateStr;
+                    anoLinha = anchor.year;
                 }
 
-                return {
-                    "year": year,
-                    "month": month,
-                    "day": day,
-                    "headline": row[finalTitleIndex] || "Sem Título",
-                    "text": row[finalTextIndex] || "",
-                    "media": {
-                        "url": row[finalMediaIndex] || "",
-                        "caption": ""
-                    }
-                };
-            }).filter(event => event.year); // Remove eventos sem data
+                const correnteTxt = p.corrente || '—';
+                const ideiasHtml = p.ideias.trim() ? nl2brEscaped(p.ideias) : '—';
+                const refHtml = p.referencia.trim() ? nl2brEscaped(p.referencia) : '—';
+                const citacaoHtml = p.citacao.trim() ? nl2brEscaped(p.citacao) : '';
+
+                timelineEvents.push({
+                    year: anchor.year,
+                    yearNum: isNaN(y) ? 0 : y,
+                    month: anchor.month || '',
+                    day: anchor.day || '',
+                    corrente: correnteTxt,
+                    autorLinha: autorLinha,
+                    anoLinha: anoLinha,
+                    ideiasHtml: ideiasHtml,
+                    citacaoHtml: citacaoHtml,
+                    referenciaHtml: refHtml,
+                    media: { url: mediaUrl, caption: '' }
+                });
+            });
 
             return timelineEvents;
         }
 
-        // Função para renderizar a timeline
         function renderTimeline(data) {
-            const timelineJson = convertToTimelineFormat(data);
-            
-            // Cria o objeto de timeline
-            const timelineConfig = {
-                "title": {
-                    "media": {
-                        "url": "",
-                        "caption": ""
-                    },
-                    "text": {
-                        "headline": "Minha Linha do Tempo",
-                        "text": "<p>Dados carregados da planilha automaticamente</p>"
-                    }
-                },
-                "events": timelineJson
-            };
+            const list = document.getElementById('vertical-timeline-list');
+            const tpl = document.getElementById('timeline-item-template');
+            if (!list || !tpl) return;
 
-            // Limpa e cria a timeline
-            document.getElementById('timeline-embed').innerHTML = '';
-            window.timeline = new TL.Timeline('timeline-embed', timelineConfig);
+            const events = convertToTimelineFormat(data).filter(e => e.yearNum > 0);
+            events.sort((a, b) => a.yearNum - b.yearNum || String(a.month).localeCompare(String(b.month)) || String(a.day).localeCompare(String(b.day)));
+
+            list.replaceChildren();
+
+            events.forEach(ev => {
+                const node = tpl.content.cloneNode(true);
+                const yearEl = node.querySelector('.js-vt-year');
+                const correnteEl = node.querySelector('.js-vt-corrente');
+                const autorEl = node.querySelector('.js-vt-autor');
+                const anoEl = node.querySelector('.js-vt-ano');
+                const ideiasEl = node.querySelector('.js-vt-ideias');
+                const refEl = node.querySelector('.js-vt-ref');
+                const fig = node.querySelector('.vt-figure');
+                const img = node.querySelector('.js-vt-img');
+
+                yearEl.textContent = ev.year;
+                correnteEl.textContent = ev.corrente || '—';
+                autorEl.textContent = ev.autorLinha || '';
+                anoEl.textContent = ev.anoLinha || ev.year || '—';
+
+                const cit = ev.citacaoHtml;
+                let ideiasBlock = (ev.ideiasHtml && ev.ideiasHtml !== '—') ? ev.ideiasHtml : '';
+                if (cit && cit.trim() !== '') {
+                    const citOneLine = cit
+                        .replace(/<br\s*\/?>/gi, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                        .replace(/\.+$/g, '');
+                    if (citOneLine) {
+                        ideiasBlock = ideiasBlock.replace(/(?:<br\s*\/?>\s*)+$/gi, '').trim();
+                        if (ideiasBlock && ideiasBlock !== '—') ideiasBlock += ' ';
+                        ideiasBlock += citOneLine + '.';
+                    }
+                }
+                if (!ideiasBlock) ideiasBlock = '—';
+                ideiasEl.innerHTML = ideiasBlock;
+
+                const ref = ev.referenciaHtml;
+                if (refEl) refEl.innerHTML = ref && ref !== '—' ? ref : '—';
+
+                const url = (ev.media && ev.media.url) ? String(ev.media.url).trim() : '';
+                if (url && /^https?:\/\//i.test(url)) {
+                    img.src = url;
+                    img.alt = ev.autorLinha || 'Ilustração';
+                    fig.classList.remove('d-none');
+                }
+
+                list.appendChild(node);
+            });
+
+            if (events.length === 0) {
+                list.innerHTML = '<li class="vertical-timeline-placeholder list-unstyled text-muted small" style="margin-left:-5.5rem;width:calc(100% + 5.5rem)">Nenhum registro com ano válido para exibir na linha do tempo.</li>';
+            }
         }
 
-        // Função para renderizar a tabela HTML
+        function verticalTimelinePlaceholderHtml(inner) {
+            return '<li class="vertical-timeline-placeholder list-unstyled" style="margin-left:-5.5rem;width:calc(100% + 5.5rem);max-width:none">' +
+                '<div class="px-2">' + inner + '</div></li>';
+        }
+
+        const TABLE_HEADERS_7 = [
+            'Corrente',
+            'Teórico(a)',
+            'Nasc.',
+            'Marco',
+            'Óbito',
+            'Ideias',
+            'Referência (ABNT)'
+        ];
+
+        const TABLE_HEADERS_6 = [
+            'Teórico(a)',
+            'Nasc.',
+            'Marco',
+            'Óbito',
+            'Ideias',
+            'Referência (ABNT)'
+        ];
+
+        function tableDisplayHeaders(colCount) {
+            return colCount >= 7 ? TABLE_HEADERS_7 : TABLE_HEADERS_6;
+        }
+
+        function tableColClass(colIndex, colCount) {
+            if (colCount >= 7) {
+                if (colIndex === 0) return 'col-corrente';
+                if (colIndex === 1) return 'col-figura';
+                if (colIndex >= 2 && colIndex <= 4) return 'col-data';
+                if (colIndex === 5) return 'col-texto';
+                if (colIndex === 6) return 'col-citacao';
+                return 'col-extra';
+            }
+            if (colIndex === 0) return 'col-figura';
+            if (colIndex >= 1 && colIndex <= 3) return 'col-data';
+            if (colIndex === 4) return 'col-texto';
+            if (colIndex === 5) return 'col-citacao';
+            return 'col-extra';
+        }
+
+        function tableHeaderLabel(colIndex, rawHeader, colCount) {
+            const labels = tableDisplayHeaders(colCount);
+            if (colIndex < labels.length) {
+                return labels[colIndex];
+            }
+            return escapeHtml(rawHeader || '');
+        }
+
         function renderTable(data) {
             if (!data || data.length === 0) return;
-            
-            let html = '<div style="overflow-x: auto;"><table><thead><tr>';
-            // Cabeçalhos
-            data[0].forEach(header => {
-                html += `<th>${header}</th>`;
-            });
+
+            const rawHeaders = data[0];
+            const colCount = rawHeaders.length;
+            const labels = tableDisplayHeaders(colCount);
+
+            let html = '<div class="table-responsive"><table class="table table-striped table-bordered table-hover align-middle mb-0 table-sticky table-data-psi">';
+            html += '<thead class="table-primary"><tr>';
+            for (let c = 0; c < colCount; c++) {
+                const cls = tableColClass(c, colCount);
+                const label = tableHeaderLabel(c, rawHeaders[c], colCount);
+                const titleAttr = c < labels.length && rawHeaders[c]
+                    ? ' title="' + escapeHtml(String(rawHeaders[c])) + '"'
+                    : '';
+                html += '<th scope="col" class="' + cls + '"' + titleAttr + '>' + label + '</th>';
+            }
             html += '</tr></thead><tbody>';
-            
-            // Dados
+
             for (let i = 1; i < data.length; i++) {
+                const row = data[i] || [];
                 html += '<tr>';
-                data[i].forEach(cell => {
-                    html += `<td>${cell || ''}</td>`;
-                });
+                for (let c = 0; c < colCount; c++) {
+                    const cls = tableColClass(c, colCount);
+                    html += '<td class="' + cls + '">' + escapeHtml(row[c]) + '</td>';
+                }
                 html += '</tr>';
             }
             html += '</tbody></table></div>';
-            
-            document.getElementById('table-content').innerHTML = html;
+
+            document.getElementById('table-content').innerHTML =
+                html +
+                '<p class="small text-muted mt-2 mb-0">A coluna <strong>Referência (ABNT)</strong> reúne citação e referência bibliográfica no padrão exigido pela disciplina.</p>';
         }
 
-        // Carrega os dados do Google Sheets
         function loadData() {
-            const timelineDiv = document.getElementById('timeline-embed');
+            const list = document.getElementById('vertical-timeline-list');
             const tableDiv = document.getElementById('table-content');
-            
-            timelineDiv.innerHTML = '<div class="loading">⏳ Carregando dados da planilha...</div>';
-            tableDiv.innerHTML = '<div class="loading">⏳ Carregando...</div>';
 
-            // Usa o Papa Parse para ler o CSV da URL pública
+            tableDiv.innerHTML = loadingHtml('Carregando…');
+            if (list) list.innerHTML = verticalTimelinePlaceholderHtml(loadingHtml('Carregando teóricos…'));
+
             Papa.parse(GOOGLE_SHEET_CSV_URL, {
                 download: true,
-                header: false, // Mantém como array de arrays para flexibilidade
+                header: false,
                 complete: function(results) {
                     rawData = results.data;
                     if (rawData && rawData.length > 1) {
+                        if (list) list.innerHTML = '';
                         renderTimeline(rawData);
                         renderTable(rawData);
                     } else {
-                        timelineDiv.innerHTML = '<div class="error">❌ Nenhum dado encontrado na planilha. Verifique se ela tem pelo menos 2 linhas (cabeçalho + dados).</div>';
-                        tableDiv.innerHTML = '<div class="error">❌ Nenhum dado encontrado.</div>';
+                        if (list) list.innerHTML = verticalTimelinePlaceholderHtml(errorHtml('Nenhum dado encontrado na planilha. Verifique se ela tem pelo menos 2 linhas (cabeçalho + dados).'));
+                        tableDiv.innerHTML = errorHtml('Nenhum dado encontrado.');
                     }
                 },
                 error: function(error) {
                     console.error('Erro:', error);
-                    timelineDiv.innerHTML = '<div class="error">❌ Erro ao carregar a planilha. Verifique se o link está correto e se a planilha está publicada como CSV.</div>';
-                    tableDiv.innerHTML = '<div class="error">❌ Erro ao carregar os dados.</div>';
+                    if (list) list.innerHTML = verticalTimelinePlaceholderHtml(errorHtml('Erro ao carregar a planilha. Verifique se o link está correto e se a planilha está publicada como CSV.'));
+                    tableDiv.innerHTML = errorHtml('Erro ao carregar os dados.');
                 }
             });
         }
 
-        // Inicia o carregamento quando a página carregar
         window.addEventListener('DOMContentLoaded', () => {
+            initPlanilhaLink();
             if (GOOGLE_SHEET_CSV_URL === 'SEU_LINK_DO_CSV_AQUI') {
-                document.getElementById('timeline-embed').innerHTML = '<div class="error">⚠️ Configure a variável GOOGLE_SHEET_CSV_URL no código com o link da sua planilha publicada.</div>';
-                document.getElementById('table-content').innerHTML = '<div class="error">⚠️ Configure a URL da planilha.</div>';
+                const list = document.getElementById('vertical-timeline-list');
+                if (list) list.innerHTML = verticalTimelinePlaceholderHtml(errorHtml('Configure a variável GOOGLE_SHEET_CSV_URL no código com o link da sua planilha publicada.'));
+                document.getElementById('table-content').innerHTML = errorHtml('Configure a URL da planilha.');
                 return;
             }
             loadData();
         });
     </script>
-    <!-- Biblioteca do TimelineJS -->
-    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
 </body>
 </html>
