@@ -18,35 +18,80 @@
             border-radius: 0.6rem;
             box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.06);
             background: color-mix(in srgb, var(--bs-body-bg) 97%, var(--bs-primary) 3%);
-            padding: 1rem 1.1rem;
+            padding: 0.75rem 0.85rem;
         }
-        #timeline-embed .timeline__content h2 {
-            margin-bottom: 0.5rem;
-            font-size: 1.05rem;
-            color: var(--bs-primary);
+        #timeline-embed .vt-meta {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.35rem 0.6rem;
+            align-items: baseline;
+            margin-bottom: 0.45rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--bs-primary) 10%, var(--bs-border-color));
+        }
+        #timeline-embed .vt-autor {
+            margin: 0;
+            font-size: 0.82rem;
+            line-height: 1.25;
+            font-weight: 600;
+            color: var(--bs-body-color);
+        }
+        #timeline-embed .vt-ano {
+            margin: 0;
+            font-size: 0.72rem;
+            line-height: 1.2;
             font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--bs-secondary-color);
+            white-space: nowrap;
+        }
+        #timeline-embed .vt-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            align-items: start;
+        }
+        #timeline-embed .vt-col {
+            min-width: 0;
         }
         #timeline-embed .vt-label {
-            margin-bottom: 0.2rem;
-            font-size: 0.7rem;
+            margin-bottom: 0.15rem;
+            font-size: 0.64rem;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             color: var(--bs-secondary-color);
         }
         #timeline-embed .vt-value {
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            margin-bottom: 0;
+            font-size: 0.76rem;
+            line-height: 1.3;
             color: var(--bs-body-color);
+            word-break: break-word;
         }
         #timeline-embed .vt-figure {
-            margin: 0 0 0.85rem;
+            margin: 0 0 0.5rem;
         }
         #timeline-embed .vt-figure img {
             max-width: 100%;
-            height: auto;
-            border-radius: 0.45rem;
-            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+            max-height: 8.5rem;
+            object-fit: cover;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.2rem 0.55rem rgba(0, 0, 0, 0.08);
+        }
+        #timeline-embed .js-vt-ref {
+            color: var(--bs-secondary-color);
+            font-size: 0.66rem;
+            line-height: 1.22;
+        }
+        @media (max-width: 767.98px) {
+            #timeline-embed .timeline__content {
+                padding: 0.7rem 0.75rem;
+            }
+            #timeline-embed .vt-meta {
+                grid-template-columns: 1fr;
+                gap: 0.2rem;
+            }
         }
         #timeline-embed .timeline__item--placeholder {
             list-style: none;
@@ -144,20 +189,22 @@
     <template id="timeline-item-template">
         <div class="timeline__item">
             <div class="timeline__content">
-                <h2 class="js-vt-year"></h2>
-                <figure class="vt-figure d-none">
-                    <img class="js-vt-img" alt="">
-                </figure>
-                <p class="vt-label mb-0">Corrente psicológica</p>
-                <p class="vt-value js-vt-corrente"></p>
-                <p class="vt-label mb-0">Autor</p>
-                <p class="vt-value js-vt-autor"></p>
-                <p class="vt-label mb-0">Ano</p>
-                <p class="vt-value js-vt-ano"></p>
-                <p class="vt-label mb-0">Ideias</p>
-                <div class="vt-value js-vt-ideias"></div>
-                <p class="vt-label mt-2 mb-0">Referência</p>
-                <div class="vt-value mb-0 js-vt-ref"></div>
+                <div class="vt-meta">
+                    <p class="vt-autor js-vt-autor"></p>
+                    <p class="vt-ano js-vt-ano"></p>
+                </div>
+                <div class="vt-grid">
+                    <div class="vt-col">
+                        <figure class="vt-figure d-none">
+                            <img class="js-vt-img" alt="">
+                        </figure>
+                        <p class="vt-label js-vt-corrente">Ideias centrais</p>
+                        <div class="vt-value js-vt-ideias"></div>
+                    </div>
+                    <div class="vt-col">
+                        <div class="vt-value js-vt-ref"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </template>
@@ -457,7 +504,6 @@
 
             events.forEach(ev => {
                 const node = tpl.content.cloneNode(true);
-                const yearEl = node.querySelector('.js-vt-year');
                 const correnteEl = node.querySelector('.js-vt-corrente');
                 const autorEl = node.querySelector('.js-vt-autor');
                 const anoEl = node.querySelector('.js-vt-ano');
@@ -467,8 +513,7 @@
                 const fig = node.querySelector('.vt-figure');
                 const img = node.querySelector('.js-vt-img');
 
-                yearEl.textContent = ev.year;
-                correnteEl.textContent = ev.corrente || '—';
+                if (correnteEl) correnteEl.textContent = ev.corrente || 'Corrente psicológica';
                 autorEl.textContent = ev.autorLinha || '';
                 anoEl.textContent = ev.anoLinha || ev.year || '—';
                 if (item) {
