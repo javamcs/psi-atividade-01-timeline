@@ -114,7 +114,7 @@ function autorVidaLabel(birth, death) {
     const by = birth.year || '';
     const dy = death.year || '';
     if (by && dy) return '(' + by + '-' + dy + ')';
-    if (by) return '(' + by + ')';
+    if (by) return '(' + by + '-Atual)';
     if (dy) return '(' + dy + ')';
     return '';
 }

@@ -43,7 +43,7 @@ function loadData() {
                 if (isTimesheetTabActive()) {
                     renderTimesheet(rawData);
                 } else if (timesheetDiv) {
-                    timesheetDiv.innerHTML = '<p class="small text-muted mb-0">Abra a aba Timesheet para carregar a visualização.</p>';
+                    timesheetDiv.innerHTML = '<p class="small text-muted mb-0">Abra a aba Linha do tempo da vida para carregar a visualização.</p>';
                 }
             } else {
                 if (list) list.innerHTML = verticalTimelinePlaceholderHtml(errorHtml('Nenhum dado encontrado na planilha. Verifique se ela tem pelo menos 2 linhas (cabeçalho + dados).'));

@@ -1,6 +1,6 @@
 function formatLifeRangeLabel(nascYear, obitoYear) {
     const start = nascYear || '?';
-    const end = obitoYear || '?';
+    const end = obitoYear || 'Atual';
     return '(' + start + '-' + end + ')';
 }
 
@@ -9,11 +9,18 @@ function toTimesheetEntry(psychRow) {
     const death = parseDateParts(psychRow.obitoRaw);
     const nascYear = birth.year || '';
     const obitoYear = death.year || '';
+    const currentYear = new Date().getFullYear();
 
     if (!nascYear && !obitoYear) return null;
 
     const startYear = nascYear || obitoYear;
-    const endYear = obitoYear || nascYear;
+    let endYear = obitoYear ? obitoYear : String(currentYear);
+    const startNum = parseInt(startYear, 10);
+    const endNum = parseInt(endYear, 10);
+    if (!isNaN(startNum) && !isNaN(endNum) && endNum < startNum) {
+        endYear = startYear;
+    }
+
     const corrente = psychRow.corrente ? ' - ' + psychRow.corrente : '';
     const label = psychRow.autor + ' ' + formatLifeRangeLabel(nascYear, obitoYear) + corrente;
 
@@ -47,7 +54,13 @@ function getTimesheetBounds(entries) {
     });
 
     if (!isFinite(minYear) || !isFinite(maxYear)) return null;
-    return { minYear, maxYear };
+
+    // Respiro no início: evita que a primeira barra fique colada/cortada na borda esquerda.
+    const minPadded = Math.max(1, minYear - 10);
+    // Respiro no fim: espaço à direita para a última barra e leitura da escala.
+    const maxPadded = maxYear + 30;
+
+    return { minYear: minPadded, maxYear: maxPadded, dataMinYear: minYear, dataMaxYear: maxYear };
 }
 
 function applyDecadeScale(host) {
@@ -59,7 +72,13 @@ function applyDecadeScale(host) {
         const isDecade = year % 10 === 0;
         section.classList.toggle('ts-decade', isDecade);
         section.classList.toggle('ts-year', !isDecade);
-        section.textContent = isDecade ? String(year) : '';
+        section.textContent = '';
+        if (isDecade) {
+            const label = document.createElement('span');
+            label.className = 'ts-decade-label';
+            label.textContent = String(year);
+            section.appendChild(label);
+        }
         section.title = String(year);
     });
 }
@@ -93,7 +112,16 @@ function renderTimesheet(data) {
         container.innerHTML = errorHtml('Não foi possível calcular o intervalo de anos para o Timesheet.');
         return;
     }
-    console.log('Intervalo calculado:', bounds.minYear, '->', bounds.maxYear);
+    console.log(
+        'Intervalo dos dados:',
+        bounds.dataMinYear,
+        '->',
+        bounds.dataMaxYear,
+        '| Escala (com respiro):',
+        bounds.minYear,
+        '->',
+        bounds.maxYear
+    );
 
     container.innerHTML = '<div id="timesheet"></div>';
 
