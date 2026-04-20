@@ -95,13 +95,104 @@
             font-size: 0.66rem;
             line-height: 1.3;
         }
+        #timeline-embed .js-vt-toggle {
+            font-size: 0.66rem;
+            line-height: 1.1;
+            text-decoration: none;
+        }
+        @media (min-width: 768px) {
+            #timeline-embed .timeline__item .js-vt-ideias {
+                display: -webkit-box;
+                -webkit-line-clamp: 5;
+                line-clamp: 5;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            #timeline-embed .timeline__item .vt-col--ref {
+                display: none;
+            }
+            #timeline-embed .timeline__item.has-mobile-toggle .js-vt-toggle {
+                display: inline-block !important;
+            }
+            #timeline-embed .timeline__item.is-expanded .js-vt-ideias {
+                display: block;
+                -webkit-line-clamp: unset;
+                line-clamp: unset;
+                overflow: visible;
+            }
+            #timeline-embed .timeline__item.is-expanded .vt-col--ref {
+                display: block;
+            }
+        }
         @media (max-width: 767.98px) {
+            #timeline-pane {
+                padding: 0.5rem !important;
+            }
+            #timeline-embed {
+                padding: 0.45rem !important;
+            }
             #timeline-embed .timeline__content {
                 padding: 0.7rem 0.75rem;
+            }
+            #timeline-embed .timeline__item .js-vt-ideias {
+                display: -webkit-box;
+                -webkit-line-clamp: 6;
+                line-clamp: 6;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            #timeline-embed .timeline__item .vt-col--ref {
+                display: none;
+            }
+            #timeline-embed .timeline__item.has-mobile-toggle .js-vt-toggle {
+                display: inline-block !important;
+            }
+            #timeline-embed .timeline__item.is-expanded .js-vt-ideias {
+                display: block;
+                -webkit-line-clamp: unset;
+                line-clamp: unset;
+                overflow: visible;
+            }
+            #timeline-embed .timeline__item.is-expanded .vt-col--ref {
+                display: block;
             }
             #timeline-embed .vt-meta {
                 grid-template-columns: 1fr;
                 gap: 0.2rem;
+            }
+            /* Ajustes finos de alinhamento no modo mobile do plugin */
+            #timeline-embed.timeline--mobile::before {
+                left: 10px !important;
+                width: 4px !important;
+                margin-left: 0 !important;
+            }
+            #timeline-embed.timeline--mobile .timeline__item {
+                width: 100% !important;
+                left: 0 !important;
+                padding: 0 0 0.65rem 2.1rem !important;
+            }
+            #timeline-embed.timeline--mobile .timeline__item::after {
+                left: -3px !important;
+                right: auto !important;
+                top: 0.95rem !important;
+                transform: translateY(-50%) !important;
+                width: 20px !important;
+                height: 20px !important;
+                border-width: 4px !important;
+            }
+            #timeline-embed.timeline--mobile .timeline__content {
+                width: 100% !important;
+                max-width: none !important;
+            }
+            #timeline-embed.timeline--mobile .timeline__content::before {
+                top: 0.95rem !important;
+                left: -12px !important;
+                right: auto !important;
+            }
+            #timeline-embed.timeline--mobile .timeline__content::after {
+                top: 0.95rem !important;
+                left: -10px !important;
+                right: auto !important;
             }
         }
         #timeline-embed .timeline__item--placeholder {
@@ -254,6 +345,29 @@
                 opacity: 1 !important;
                 visibility: visible !important;
             }
+            /* Na impressão, sempre mostrar tudo (mesmo no mobile) */
+            #timeline-embed .js-vt-toggle,
+            #timeline-embed button.js-vt-toggle,
+            #timeline-embed .btn.js-vt-toggle {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 0 !important;
+                overflow: hidden !important;
+            }
+            #timeline-embed .timeline__item .js-vt-ideias,
+            #timeline-embed .timeline__item.is-expanded .js-vt-ideias {
+                display: block !important;
+                -webkit-line-clamp: unset !important;
+                line-clamp: unset !important;
+                overflow: visible !important;
+            }
+            #timeline-embed .timeline__item .vt-col--ref,
+            #timeline-embed .timeline__item.is-expanded .vt-col--ref {
+                display: block !important;
+            }
             /* Fontes menores nos cards para impressão */
             #timeline-embed .timeline__content {
                 padding: 2.2mm 2.6mm !important;
@@ -351,8 +465,9 @@
                         </figure>
                         <p class="vt-label js-vt-corrente">Ideias centrais</p>
                         <div class="vt-value js-vt-ideias"></div>
+                        <button type="button" class="btn btn-link btn-sm p-0 mt-1 js-vt-toggle d-none" aria-expanded="false">Ver mais</button>
                     </div>
-                    <div class="vt-col">
+                    <div class="vt-col vt-col--ref">
                         <div class="vt-value js-vt-ref"></div>
                     </div>
                 </div>
@@ -550,6 +665,12 @@
             return escapeHtml(s).replace(/\r\n|\r|\n/g, '<br>');
         }
 
+        function plainTextFromHtml(html) {
+            const temp = document.createElement('div');
+            temp.innerHTML = html || '';
+            return (temp.textContent || temp.innerText || '').trim();
+        }
+
         function parsePsychRow(row, map) {
             const corIdx = map.corrente;
             return {
@@ -669,6 +790,7 @@
                 const ideiasEl = node.querySelector('.js-vt-ideias');
                 const refEl = node.querySelector('.js-vt-ref');
                 const item = node.querySelector('.timeline__item');
+                const toggleBtn = node.querySelector('.js-vt-toggle');
                 const fig = node.querySelector('.vt-figure');
                 const img = node.querySelector('.js-vt-img');
 
@@ -698,6 +820,33 @@
 
                 const ref = ev.referenciaHtml;
                 if (refEl) refEl.innerHTML = ref && ref !== '—' ? ref : '—';
+
+                const ideiasPlainText = plainTextFromHtml(ideiasBlock);
+                const hasRefText = !!(ref && ref !== '—');
+                const shouldCollapseOnMobile = ideiasPlainText.length > 220 || hasRefText;
+                if (item) {
+                    item.classList.remove('has-mobile-toggle', 'is-expanded');
+                    if (shouldCollapseOnMobile) {
+                        item.classList.add('has-mobile-toggle');
+                    } else {
+                        item.classList.add('is-expanded');
+                    }
+                }
+                if (toggleBtn) {
+                    if (shouldCollapseOnMobile) {
+                        toggleBtn.classList.remove('d-none');
+                        toggleBtn.textContent = 'Ver mais';
+                        toggleBtn.setAttribute('aria-expanded', 'false');
+                        toggleBtn.addEventListener('click', () => {
+                            if (!item) return;
+                            const expanded = item.classList.toggle('is-expanded');
+                            toggleBtn.textContent = expanded ? 'Ver menos' : 'Ver mais';
+                            toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                        });
+                    } else {
+                        toggleBtn.classList.add('d-none');
+                    }
+                }
 
                 const url = (ev.media && ev.media.url) ? String(ev.media.url).trim() : '';
                 if (url && /^https?:\/\//i.test(url)) {
