@@ -117,47 +117,85 @@
         }
         .table-data-psi {
             width: 100%;
+            min-width: 1200px;
             margin-bottom: 0;
+            table-layout: fixed;
+            font-size: 0.72rem;
+            line-height: 1.25;
         }
         .table-data-psi th.col-corrente,
         .table-data-psi td.col-corrente,
         .table-data-psi th.col-figura,
         .table-data-psi td.col-figura {
-            min-width: 10rem;
-            max-width: 16rem;
+            min-width: 0;
             word-break: break-word;
+            overflow-wrap: anywhere;
         }
         .table-data-psi th.col-data,
         .table-data-psi td.col-data {
-            min-width: 5.5rem;
-            font-size: 0.875rem;
-            line-height: 1.3;
+            min-width: 0;
+            font-size: 0.68rem;
+            line-height: 1.2;
             vertical-align: top;
+            white-space: nowrap;
         }
         .table-data-psi th.col-data {
-            font-size: 0.68rem;
+            font-size: 0.6rem;
             font-weight: 700;
             letter-spacing: 0.03em;
             text-transform: uppercase;
             line-height: 1.2;
-            padding-top: 0.4rem;
-            padding-bottom: 0.4rem;
+            padding-top: 0.28rem;
+            padding-bottom: 0.28rem;
         }
         .table-data-psi th.col-texto,
         .table-data-psi td.col-texto,
         .table-data-psi th.col-citacao,
         .table-data-psi td.col-citacao {
-            min-width: 16rem;
-            max-width: 22rem;
-            font-size: 0.8125rem;
-            line-height: 1.45;
+            min-width: 0;
+            font-size: 0.7rem;
+            line-height: 1.25;
             word-break: break-word;
+            overflow-wrap: anywhere;
             vertical-align: top;
         }
         .table-data-psi th.col-extra,
         .table-data-psi td.col-extra {
-            min-width: 8rem;
+            min-width: 0;
             word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .table-data-psi th,
+        .table-data-psi td {
+            padding: 0.24rem 0.36rem;
+        }
+        .table-data-psi thead th {
+            position: sticky;
+            top: 0;
+            background: color-mix(in srgb, var(--bs-primary-bg-subtle) 88%, #fff);
+            border-bottom-width: 1px;
+        }
+        .table-data-psi col.col-corrente {
+            width: 11%;
+        }
+        .table-data-psi col.col-figura {
+            width: 12%;
+        }
+        .table-data-psi col.col-data {
+            width: 8%;
+        }
+        .table-data-psi col.col-texto {
+            width: 27%;
+        }
+        .table-data-psi col.col-citacao {
+            width: 28%;
+        }
+        .table-data-psi col.col-extra {
+            width: 8%;
+        }
+        .table-scroll-wrap {
+            max-height: min(68vh, 38rem);
+            overflow: auto;
         }
         @media print {
             @page {
@@ -261,10 +299,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-bottom py-0 px-0">
                 <div class="px-3 pt-3 pb-2">
-                    <h1 class="h5 mb-1">Trabalho de Psicologia - Timeline</h1>
-                    <p id="planilha-link-wrap" class="small mb-0">
-                        <a id="link-planilha" href="#" target="_blank" rel="noopener noreferrer" class="link-primary">Abrir planilha de dados</a>
-                    </p>
+                    <h1 class="h5 mb-1">Timeline - Trabalho de Psicologia</h1>
                 </div>
                 <ul class="nav nav-tabs px-3 pt-1 border-bottom-0" id="mainTabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -280,7 +315,7 @@
                     <div class="tab-pane fade show active p-3" id="timeline-pane" role="tabpanel" aria-labelledby="timeline-tab" tabindex="0">
                         <div class="d-flex justify-content-end mb-2 no-print">
                             <button id="print-timeline-btn" type="button" class="btn btn-sm btn-outline-secondary">
-                                Imprimir timeline
+                                Imprimir
                             </button>
                         </div>
                         <div id="timeline-embed" class="timeline bg-white p-3 p-md-4" data-mode="vertical" data-vertical-start-position="left" data-vertical-trigger="150px">
@@ -290,6 +325,11 @@
                         </div>
                     </div>
                     <div class="tab-pane fade p-3" id="table-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+                        <div id="planilha-link-wrap" class="d-flex justify-content-end mb-2">
+                            <a id="link-planilha" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+                                Origem dos dados
+                            </a>
+                        </div>
                         <div id="table-content"></div>
                     </div>
                 </div>
@@ -715,7 +755,23 @@
             return colCount >= 7 ? TABLE_HEADERS_7 : TABLE_HEADERS_6;
         }
 
-        function tableColClass(colIndex, colCount) {
+        function isReferenceHeaderLabel(header) {
+            const h = normHeaderCell(header);
+            return /\babnt\b/.test(h) ||
+                h.includes('referencia') ||
+                h.includes('citacao e refer') ||
+                (h.includes('citacao') && h.includes('refer'));
+        }
+
+        function detectReferenceColumnIndex(rawHeaders) {
+            for (let i = (rawHeaders || []).length - 1; i >= 0; i--) {
+                if (isReferenceHeaderLabel(rawHeaders[i])) return i;
+            }
+            return -1;
+        }
+
+        function tableColClass(colIndex, colCount, referenceColIndex) {
+            if (colIndex === referenceColIndex) return 'col-citacao';
             if (colCount >= 7) {
                 if (colIndex === 0) return 'col-corrente';
                 if (colIndex === 1) return 'col-figura';
@@ -731,7 +787,10 @@
             return 'col-extra';
         }
 
-        function tableHeaderLabel(colIndex, rawHeader, colCount) {
+        function tableHeaderLabel(colIndex, rawHeader, colCount, referenceColIndex) {
+            if (colIndex === referenceColIndex) {
+                return 'Referência (ABNT)';
+            }
             const labels = tableDisplayHeaders(colCount);
             if (colIndex < labels.length) {
                 return labels[colIndex];
@@ -739,18 +798,43 @@
             return escapeHtml(rawHeader || '');
         }
 
+        function tableColumnWidth(colIndex, colCount, referenceColIndex) {
+            if (colIndex === referenceColIndex) return '28%';
+            if (colCount >= 7) {
+                if (colIndex === 0) return '11%';
+                if (colIndex === 1) return '12%';
+                if (colIndex >= 2 && colIndex <= 4) return '8%';
+                if (colIndex === 5) return '27%';
+                if (colIndex === 6) return '28%';
+                return '8%';
+            }
+            if (colIndex === 0) return '14%';
+            if (colIndex >= 1 && colIndex <= 3) return '7%';
+            if (colIndex === 4) return '37%';
+            if (colIndex === 5) return '28%';
+            return '7%';
+        }
+
         function renderTable(data) {
             if (!data || data.length === 0) return;
 
             const rawHeaders = data[0];
             const colCount = rawHeaders.length;
+            const referenceColIndex = detectReferenceColumnIndex(rawHeaders);
             const labels = tableDisplayHeaders(colCount);
 
-            let html = '<div class="table-responsive"><table class="table table-striped table-bordered table-hover align-middle mb-0 table-sticky table-data-psi">';
+            let html = '<div class="table-responsive table-scroll-wrap"><table class="table table-striped table-bordered table-hover align-middle mb-0 table-sticky table-data-psi">';
+            html += '<colgroup>';
+            for (let c = 0; c < colCount; c++) {
+                const cls = tableColClass(c, colCount, referenceColIndex);
+                const width = tableColumnWidth(c, colCount, referenceColIndex);
+                html += '<col class="' + cls + '" style="width:' + width + ';">';
+            }
+            html += '</colgroup>';
             html += '<thead class="table-primary"><tr>';
             for (let c = 0; c < colCount; c++) {
-                const cls = tableColClass(c, colCount);
-                const label = tableHeaderLabel(c, rawHeaders[c], colCount);
+                const cls = tableColClass(c, colCount, referenceColIndex);
+                const label = tableHeaderLabel(c, rawHeaders[c], colCount, referenceColIndex);
                 const titleAttr = c < labels.length && rawHeaders[c]
                     ? ' title="' + escapeHtml(String(rawHeaders[c])) + '"'
                     : '';
@@ -762,16 +846,14 @@
                 const row = data[i] || [];
                 html += '<tr>';
                 for (let c = 0; c < colCount; c++) {
-                    const cls = tableColClass(c, colCount);
+                    const cls = tableColClass(c, colCount, referenceColIndex);
                     html += '<td class="' + cls + '">' + escapeHtml(row[c]) + '</td>';
                 }
                 html += '</tr>';
             }
             html += '</tbody></table></div>';
 
-            document.getElementById('table-content').innerHTML =
-                html +
-                '<p class="small text-muted mt-2 mb-0">A coluna <strong>Referência (ABNT)</strong> reúne citação e referência bibliográfica no padrão exigido pela disciplina.</p>';
+            document.getElementById('table-content').innerHTML = html;
         }
 
         function loadData() {
