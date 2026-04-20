@@ -1,4 +1,92 @@
 /* =========================
+   Tema Moderno Clean
+========================= */
+:root {
+    --app-surface: #ffffff;
+    --app-surface-soft: #f8fafc;
+    --app-border: #e2e8f0;
+    --app-border-strong: #d6deea;
+    --app-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --app-shadow-md: 0 10px 24px rgba(15, 23, 42, 0.07);
+    --app-radius-lg: 0.95rem;
+    --app-radius-md: 0.75rem;
+}
+
+body {
+    background:
+        radial-gradient(100% 55% at 0% 0%, color-mix(in srgb, var(--bs-primary) 8%, transparent), transparent 56%),
+        linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #0f172a;
+}
+
+.container.py-4 {
+    max-width: 1120px;
+}
+
+.card.shadow-sm {
+    border: 1px solid var(--app-border) !important;
+    border-radius: var(--app-radius-lg) !important;
+    box-shadow: var(--app-shadow-md) !important;
+    overflow: hidden;
+    background: var(--app-surface);
+}
+
+.card-header.bg-white {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-surface) 92%, #f8fafc),
+        var(--app-surface)
+    ) !important;
+    border-bottom: 1px solid var(--app-border) !important;
+}
+
+.h5.mb-1 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+.nav-tabs {
+    gap: 0.3rem;
+}
+
+.nav-tabs .nav-link {
+    border: 0;
+    color: #475569;
+    font-weight: 500;
+    border-radius: 0.65rem 0.65rem 0 0;
+    padding: 0.48rem 0.75rem;
+}
+
+.nav-tabs .nav-link:hover {
+    background: #f8fafc;
+    color: #334155;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0f172a;
+    background: #ffffff;
+    box-shadow: inset 0 -2px 0 #0d6efd;
+}
+
+.btn.btn-outline-secondary.btn-sm {
+    --bs-btn-color: #334155;
+    --bs-btn-border-color: #d1d9e6;
+    --bs-btn-hover-color: #0f172a;
+    --bs-btn-hover-bg: #f8fafc;
+    --bs-btn-hover-border-color: #bcc8d9;
+    --bs-btn-active-color: #0f172a;
+    --bs-btn-active-bg: #eef2f7;
+    --bs-btn-active-border-color: #b8c4d6;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+#table-pane #planilha-link-wrap .btn {
+    box-shadow: var(--app-shadow-sm);
+}
+
+/* =========================
    Timeline
 ========================= */
 #timeline-embed {
@@ -189,7 +277,8 @@
     table-layout: fixed;
     font-size: 0.67rem;
     line-height: 1.2;
-    border-color: var(--bs-border-color);
+    border-color: var(--app-border);
+    background: #fff;
 }
 .table-data-psi th.col-corrente,
 .table-data-psi td.col-corrente,
@@ -237,12 +326,19 @@
 .table-data-psi td {
     padding: 0.18rem 0.3rem;
     vertical-align: top;
+    border-color: var(--app-border);
 }
 .table-data-psi thead th {
-    background: var(--bs-tertiary-bg);
+    background: #f8fafc;
     border-bottom-width: 1px;
     font-weight: 600;
-    color: var(--bs-body-color);
+    color: #334155;
+}
+.table-data-psi tbody tr {
+    background: #fff;
+}
+.table-data-psi tbody tr:hover {
+    background: #fff;
 }
 .table-data-psi col.col-corrente {
     width: 11%;
@@ -265,6 +361,9 @@
 .table-scroll-wrap {
     max-height: min(68vh, 38rem);
     overflow: auto;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 /* =========================
