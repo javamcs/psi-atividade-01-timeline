@@ -7,6 +7,7 @@
     <link href="resources/bootstrap.min.css" rel="stylesheet">
     <script src="resources/papaparse.min.js"></script>
     <link href="resources/timeline.min.css" rel="stylesheet">
+    <link href="resources/timesheet.min.css" rel="stylesheet">
     <link href="index.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -22,6 +23,9 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-pane" type="button" role="tab" aria-controls="table-pane" aria-selected="false">Tabela</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet-pane" type="button" role="tab" aria-controls="timesheet-pane" aria-selected="false">Timesheet</button>
                     </li>
                 </ul>
             </div>
@@ -46,6 +50,9 @@
                             </a>
                         </div>
                         <div id="table-content"></div>
+                    </div>
+                    <div class="tab-pane fade p-3" id="timesheet-pane" role="tabpanel" aria-labelledby="timesheet-tab" tabindex="0">
+                        <div id="timesheet-content" class="timesheet-wrap"></div>
                     </div>
                 </div>
             </div>
@@ -77,10 +84,12 @@
     </template>
 
     <script src="resources/timeline.min.js"></script>
+    <script src="resources/timesheet.min.js"></script>
     <script src="resources/bootstrap.bundle.min.js"></script>
     <script src="data-utils.js"></script>
     <script src="timeline.js"></script>
     <script src="table.js"></script>
+    <script src="timesheet-view.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
