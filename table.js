@@ -1,8 +1,8 @@
 const TABLE_HEADERS_7 = [
     'Corrente',
     'Teórico(a)',
-    'Nasc.',
     'Marco',
+    'Nasc.',
     'Óbito',
     'Ideias',
     'Referência (ABNT)'
@@ -10,8 +10,8 @@ const TABLE_HEADERS_7 = [
 
 const TABLE_HEADERS_6 = [
     'Teórico(a)',
-    'Nasc.',
     'Marco',
+    'Nasc.',
     'Óbito',
     'Ideias',
     'Referência (ABNT)'
@@ -117,7 +117,7 @@ function renderTable(data) {
     const referenceColIndex = detectReferenceColumnIndex(rawHeaders);
     const labels = tableDisplayHeaders(colCount);
 
-    let html = '<div class="table-responsive table-scroll-wrap"><table class="table table-striped table-bordered table-hover align-middle mb-0 table-sticky table-data-psi">';
+    let html = '<div class="table-responsive table-scroll-wrap"><table class="table table-sm table-bordered align-top mb-0 table-data-psi">';
     html += buildTableColgroupHtml(colCount, referenceColIndex);
     html += buildTableHeadHtml(rawHeaders, colCount, referenceColIndex, labels);
     html += buildTableBodyHtml(data, colCount, referenceColIndex);

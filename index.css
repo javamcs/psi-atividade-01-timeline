@@ -182,18 +182,14 @@
 /* =========================
    Tabela
 ========================= */
-.table-sticky thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-}
 .table-data-psi {
     width: 100%;
-    min-width: 1200px;
+    min-width: 1020px;
     margin-bottom: 0;
     table-layout: fixed;
-    font-size: 0.72rem;
-    line-height: 1.25;
+    font-size: 0.67rem;
+    line-height: 1.2;
+    border-color: var(--bs-border-color);
 }
 .table-data-psi th.col-corrente,
 .table-data-psi td.col-corrente,
@@ -206,13 +202,13 @@
 .table-data-psi th.col-data,
 .table-data-psi td.col-data {
     min-width: 0;
-    font-size: 0.68rem;
-    line-height: 1.2;
+    font-size: 0.64rem;
+    line-height: 1.15;
     vertical-align: top;
     white-space: nowrap;
 }
 .table-data-psi th.col-data {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 700;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -225,8 +221,8 @@
 .table-data-psi th.col-citacao,
 .table-data-psi td.col-citacao {
     min-width: 0;
-    font-size: 0.7rem;
-    line-height: 1.25;
+    font-size: 0.66rem;
+    line-height: 1.2;
     word-break: break-word;
     overflow-wrap: anywhere;
     vertical-align: top;
@@ -239,13 +235,14 @@
 }
 .table-data-psi th,
 .table-data-psi td {
-    padding: 0.24rem 0.36rem;
+    padding: 0.18rem 0.3rem;
+    vertical-align: top;
 }
 .table-data-psi thead th {
-    position: sticky;
-    top: 0;
-    background: color-mix(in srgb, var(--bs-primary-bg-subtle) 88%, #fff);
+    background: var(--bs-tertiary-bg);
     border-bottom-width: 1px;
+    font-weight: 600;
+    color: var(--bs-body-color);
 }
 .table-data-psi col.col-corrente {
     width: 11%;
