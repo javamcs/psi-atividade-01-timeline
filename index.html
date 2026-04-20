@@ -3,61 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teóricos da Psicologia — linha do tempo</title>
+    <title>Trabalho de Psicologia - Timeline</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         .vertical-timeline-wrap {
             max-height: min(70vh, 42rem);
             overflow-y: auto;
+            overflow-x: hidden;
         }
-        .vertical-timeline {
-            position: relative;
+        /* Reset Bootstrap / Reboot em <ol> da timeline */
+        ol.vertical-timeline {
+            --vt-rail-x: 5.125rem;
+            list-style: none;
             margin: 0;
-            padding: 0 0 0 5.5rem;
+            padding: 0.25rem 0 0.5rem;
+            padding-inline-start: 0 !important;
+            counter-reset: none;
+            position: relative;
         }
-        .vertical-timeline::before {
+        /* Trilho vertical: eixo fixo alinhado ao centro dos pontos */
+        ol.vertical-timeline::before {
             content: '';
             position: absolute;
-            left: 4.35rem;
-            top: 0.35rem;
-            bottom: 0.35rem;
-            width: 2px;
-            background: var(--bs-border-color);
+            left: var(--vt-rail-x);
+            top: 0.75rem;
+            bottom: 0.75rem;
+            width: 3px;
+            transform: translateX(-50%);
+            border-radius: 3px;
+            background: linear-gradient(
+                180deg,
+                color-mix(in srgb, var(--bs-primary) 55%, var(--bs-border-color)) 0%,
+                var(--bs-border-color) 45%,
+                color-mix(in srgb, var(--bs-border-color) 70%, transparent) 100%
+            );
+            z-index: 0;
+            pointer-events: none;
         }
         .vertical-timeline-item {
             position: relative;
             list-style: none;
-            padding-bottom: 1.35rem;
+            margin: 0;
+            padding: 0 0 1.75rem 0;
+            padding-left: 6.75rem;
+            padding-inline-start: 6.75rem !important;
         }
         .vertical-timeline-item:last-child {
-            padding-bottom: 0;
+            padding-bottom: 0.25rem;
         }
         .vertical-timeline-year {
             position: absolute;
             left: 0;
-            top: 0.15rem;
-            width: 3.85rem;
+            top: 0.55rem;
+            width: 4.15rem;
             text-align: right;
+            padding-right: 0.35rem;
             font-weight: 700;
-            font-size: 1.05rem;
-            line-height: 1.2;
+            font-size: 1.0625rem;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
             color: var(--bs-primary);
+            z-index: 2;
         }
+        /* Centro do ponto = centro da linha (mesmo left + translate -50%) */
         .vertical-timeline-dot {
             position: absolute;
-            left: 3.78rem;
-            top: 0.45rem;
-            width: 12px;
-            height: 12px;
+            left: var(--vt-rail-x);
+            top: 0.95rem;
+            width: 0.875rem;
+            height: 0.875rem;
+            margin: 0;
+            padding: 0;
             border-radius: 50%;
+            transform: translate(-50%, -50%);
             background: var(--bs-primary);
-            border: 2px solid var(--bs-body-bg);
-            box-shadow: 0 0 0 1px var(--bs-border-color);
-            z-index: 1;
+            border: 3px solid var(--bs-body-bg);
+            box-shadow:
+                0 0 0 2px color-mix(in srgb, var(--bs-primary) 35%, transparent),
+                0 1px 3px rgba(0, 0, 0, 0.08);
+            z-index: 3;
         }
         .vertical-timeline-card {
-            margin-left: 1.35rem;
+            margin: 0;
+            border: 1px solid var(--bs-border-color) !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06) !important;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .vertical-timeline-card:hover {
+            border-color: color-mix(in srgb, var(--bs-primary) 28%, var(--bs-border-color)) !important;
+            box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08) !important;
+        }
+        .vertical-timeline-card .card-body {
+            padding: 1rem 1.15rem;
         }
         .vertical-timeline-card .vt-body :last-child {
             margin-bottom: 0;
@@ -65,7 +104,14 @@
         .vertical-timeline-card .vt-body img {
             max-width: 100%;
             height: auto;
-            border-radius: 0.25rem;
+            border-radius: 0.375rem;
+        }
+        ol.vertical-timeline > li.vertical-timeline-placeholder {
+            list-style: none !important;
+            margin: 0 !important;
+            padding: 1.25rem 0.5rem !important;
+            padding-inline-start: 0.5rem !important;
+            text-align: center;
         }
         .table-sticky thead th {
             position: sticky;
@@ -123,7 +169,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-bottom py-0 px-0">
                 <div class="px-3 pt-3 pb-2">
-                    <h1 class="h5 mb-1">Teóricos da Psicologia</h1>
+                    <h1 class="h5 mb-1">Trabalho de Psicologia - Timeline</h1>
                     <p id="planilha-link-wrap" class="small mb-0">
                         <a id="link-planilha" href="#" target="_blank" rel="noopener noreferrer" class="link-primary">Abrir planilha de dados</a>
                     </p>
@@ -401,11 +447,22 @@
                 const marco = parseDateParts(p.marcoRaw);
                 const death = parseDateParts(p.obitoRaw);
                 const anchor = timelineAnchorParts(marco, birth, death);
-                if (!anchor.year) return;
+                const anoParts = parseDateParts(p.anoRaw);
+
+                const markParts = (() => {
+                    if (p.anoRaw != null && String(p.anoRaw).trim() !== '') {
+                        if (anoParts.year) return anoParts;
+                        const m = String(p.anoRaw).match(/\d{4}/);
+                        if (m) return { year: m[0], month: '', day: '' };
+                    }
+                    return anchor;
+                })();
+
+                if (!markParts.year) return;
 
                 const mediaUrl = p.mediaUrl;
 
-                const y = parseInt(anchor.year, 10);
+                const y = parseInt(markParts.year, 10);
                 const vida = autorVidaLabel(birth, death);
                 const autorLinha = vida ? p.autor + ' ' + vida : p.autor;
                 let anoLinha = '';
@@ -414,8 +471,13 @@
                 } else if (p.marcoRaw != null && String(p.marcoRaw).trim() !== '') {
                     anoLinha = String(p.marcoRaw).trim();
                 } else {
-                    anoLinha = anchor.year;
+                    anoLinha = markParts.year;
                 }
+
+                const anoTrim = (p.anoRaw != null && String(p.anoRaw).trim() !== '') ? String(p.anoRaw).trim() : '';
+                const railYearText = anoTrim
+                    ? (anoTrim.length <= 14 ? anoTrim : (anoParts.year || markParts.year))
+                    : markParts.year;
 
                 const correnteTxt = p.corrente || '—';
                 const ideiasHtml = p.ideias.trim() ? nl2brEscaped(p.ideias) : '—';
@@ -423,10 +485,10 @@
                 const citacaoHtml = p.citacao.trim() ? nl2brEscaped(p.citacao) : '';
 
                 timelineEvents.push({
-                    year: anchor.year,
+                    year: railYearText,
                     yearNum: isNaN(y) ? 0 : y,
-                    month: anchor.month || '',
-                    day: anchor.day || '',
+                    month: markParts.month || '',
+                    day: markParts.day || '',
                     corrente: correnteTxt,
                     autorLinha: autorLinha,
                     anoLinha: anoLinha,
@@ -497,12 +559,12 @@
             });
 
             if (events.length === 0) {
-                list.innerHTML = '<li class="vertical-timeline-placeholder list-unstyled text-muted small" style="margin-left:-5.5rem;width:calc(100% + 5.5rem)">Nenhum registro com ano válido para exibir na linha do tempo.</li>';
+                list.innerHTML = '<li class="vertical-timeline-placeholder list-unstyled text-muted small">Nenhum registro com ano válido para exibir na linha do tempo.</li>';
             }
         }
 
         function verticalTimelinePlaceholderHtml(inner) {
-            return '<li class="vertical-timeline-placeholder list-unstyled" style="margin-left:-5.5rem;width:calc(100% + 5.5rem);max-width:none">' +
+            return '<li class="vertical-timeline-placeholder list-unstyled">' +
                 '<div class="px-2">' + inner + '</div></li>';
         }
 
