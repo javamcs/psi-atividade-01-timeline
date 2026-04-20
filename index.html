@@ -9,39 +9,49 @@
     <link href="https://cdn.jsdelivr.net/gh/squarechip/timeline/dist/css/timeline.min.css" rel="stylesheet">
     <style>
         #timeline-embed {
-            border: 1px solid color-mix(in srgb, var(--bs-primary) 12%, var(--bs-border-color));
-            border-radius: 0.65rem;
-            background: var(--bs-body-bg);
+            border: 1px solid color-mix(in srgb, var(--bs-primary) 8%, var(--bs-border-color));
+            border-radius: 0.8rem;
+            background: #fff;
         }
         #timeline-embed .timeline__content {
-            border: 1px solid color-mix(in srgb, var(--bs-primary) 10%, var(--bs-border-color));
-            border-radius: 0.6rem;
-            box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.06);
-            background: color-mix(in srgb, var(--bs-body-bg) 97%, var(--bs-primary) 3%);
+            border: 1px solid color-mix(in srgb, var(--bs-primary) 7%, var(--bs-border-color));
+            border-radius: 0.75rem;
+            box-shadow:
+                0 1px 2px rgba(15, 23, 42, 0.03),
+                0 8px 20px rgba(15, 23, 42, 0.04);
+            background: color-mix(in srgb, var(--bs-body-bg) 99%, var(--bs-primary) 1%);
             padding: 0.75rem 0.85rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+        }
+        #timeline-embed .timeline__item:hover .timeline__content {
+            border-color: color-mix(in srgb, var(--bs-primary) 16%, var(--bs-border-color));
+            box-shadow:
+                0 2px 4px rgba(15, 23, 42, 0.04),
+                0 12px 26px rgba(15, 23, 42, 0.06);
+            transform: translateY(-1px);
         }
         #timeline-embed .vt-meta {
             display: grid;
             grid-template-columns: 1fr auto;
             gap: 0.35rem 0.6rem;
             align-items: baseline;
-            margin-bottom: 0.45rem;
-            padding-bottom: 0.4rem;
-            border-bottom: 1px solid color-mix(in srgb, var(--bs-primary) 10%, var(--bs-border-color));
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.45rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--bs-primary) 7%, var(--bs-border-color));
         }
         #timeline-embed .vt-autor {
             margin: 0;
             font-size: 0.82rem;
-            line-height: 1.25;
-            font-weight: 600;
-            color: var(--bs-body-color);
+            line-height: 1.32;
+            font-weight: 560;
+            color: color-mix(in srgb, var(--bs-body-color) 92%, var(--bs-primary) 8%);
         }
         #timeline-embed .vt-ano {
             margin: 0;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             line-height: 1.2;
-            font-weight: 700;
-            letter-spacing: 0.03em;
+            font-weight: 600;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
             color: var(--bs-secondary-color);
             white-space: nowrap;
@@ -56,33 +66,34 @@
             min-width: 0;
         }
         #timeline-embed .vt-label {
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.2rem;
             font-size: 0.64rem;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.045em;
             text-transform: uppercase;
-            color: var(--bs-secondary-color);
+            color: color-mix(in srgb, var(--bs-secondary-color) 85%, var(--bs-body-color) 15%);
         }
         #timeline-embed .vt-value {
             margin-bottom: 0;
             font-size: 0.76rem;
-            line-height: 1.3;
-            color: var(--bs-body-color);
+            line-height: 1.38;
+            color: color-mix(in srgb, var(--bs-body-color) 95%, var(--bs-secondary-color) 5%);
             word-break: break-word;
         }
         #timeline-embed .vt-figure {
-            margin: 0 0 0.5rem;
+            margin: 0 0 0.55rem;
         }
         #timeline-embed .vt-figure img {
             max-width: 100%;
             max-height: 8.5rem;
             object-fit: cover;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.2rem 0.55rem rgba(0, 0, 0, 0.08);
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+            filter: saturate(0.96) contrast(0.98);
         }
         #timeline-embed .js-vt-ref {
-            color: var(--bs-secondary-color);
+            color: color-mix(in srgb, var(--bs-secondary-color) 90%, var(--bs-body-color) 10%);
             font-size: 0.66rem;
-            line-height: 1.22;
+            line-height: 1.3;
         }
         @media (max-width: 767.98px) {
             #timeline-embed .timeline__content {
@@ -148,6 +159,101 @@
             min-width: 8rem;
             word-break: break-word;
         }
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 6mm;
+            }
+            body {
+                background: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                margin: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            /* Imprimir somente o timeline-embed e seu conteúdo */
+            .container {
+                max-width: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .container > :not(.card),
+            .card > :not(.card-body),
+            .card-body > :not(.tab-content),
+            .tab-content > :not(#timeline-pane),
+            #timeline-pane > :not(#timeline-embed) {
+                display: none !important;
+            }
+            .card,
+            .card-body,
+            .tab-content,
+            #timeline-pane {
+                border: 0 !important;
+                box-shadow: none !important;
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #timeline-pane {
+                display: block !important;
+            }
+            #timeline-embed {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 2mm !important;
+                border: 0 !important;
+                border-radius: 0 !important;
+                background: #fff !important;
+            }
+            #timeline-embed .timeline__item {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                animation: none !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            /* Fontes menores nos cards para impressão */
+            #timeline-embed .timeline__content {
+                padding: 2.2mm 2.6mm !important;
+                border-color: #d9dfe8 !important;
+                box-shadow: none !important;
+            }
+            #timeline-embed .vt-meta {
+                margin-bottom: 1.6mm !important;
+                padding-bottom: 1.4mm !important;
+            }
+            #timeline-embed .vt-autor {
+                font-size: 8.1pt !important;
+                line-height: 1.2 !important;
+            }
+            #timeline-embed .vt-ano {
+                font-size: 6.8pt !important;
+                line-height: 1.1 !important;
+            }
+            #timeline-embed .vt-label {
+                font-size: 6.2pt !important;
+                line-height: 1.05 !important;
+                margin-bottom: 0.8mm !important;
+            }
+            #timeline-embed .vt-value {
+                font-size: 7.1pt !important;
+                line-height: 1.18 !important;
+            }
+            #timeline-embed .js-vt-ref {
+                font-size: 6.3pt !important;
+                line-height: 1.15 !important;
+            }
+            #timeline-embed .vt-figure {
+                margin-bottom: 1.6mm !important;
+            }
+            #timeline-embed .vt-figure img {
+                max-height: 28mm !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -172,6 +278,11 @@
             <div class="card-body p-0">
                 <div class="tab-content" id="mainTabContent">
                     <div class="tab-pane fade show active p-3" id="timeline-pane" role="tabpanel" aria-labelledby="timeline-tab" tabindex="0">
+                        <div class="d-flex justify-content-end mb-2 no-print">
+                            <button id="print-timeline-btn" type="button" class="btn btn-sm btn-outline-secondary">
+                                Imprimir timeline
+                            </button>
+                        </div>
                         <div id="timeline-embed" class="timeline bg-white p-3 p-md-4" data-mode="vertical" data-vertical-start-position="right" data-vertical-trigger="150px">
                             <div class="timeline__wrap">
                                 <div id="vertical-timeline-list" class="timeline__items"></div>
@@ -237,6 +348,14 @@
             }
             a.href = spreadsheetViewUrlFromCsvUrl(u);
             wrap.classList.remove('d-none');
+        }
+
+        function initPrintButton() {
+            const btn = document.getElementById('print-timeline-btn');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                window.print();
+            });
         }
 
         function loadingHtml(message) {
@@ -686,6 +805,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             initPlanilhaLink();
+            initPrintButton();
             if (GOOGLE_SHEET_CSV_URL === 'SEU_LINK_DO_CSV_AQUI') {
                 const list = document.getElementById('vertical-timeline-list');
                 if (list) list.innerHTML = verticalTimelinePlaceholderHtml(errorHtml('Configure a variável GOOGLE_SHEET_CSV_URL no código com o link da sua planilha publicada.'));
