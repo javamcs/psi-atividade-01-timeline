@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Timeline Interativa</title>
+    <!-- CSS do TimelineJS -->
+    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+    <!-- Biblioteca Papa Parse para ler CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+        .tab-button {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .tab-button.active {
+            background: white;
+            border-bottom: 3px solid #007bff;
+            color: #007bff;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #timeline-embed {
+            height: 600px;
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+            background: #ffeeee;
+            margin: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab(event, 'timeline')">📅 Linha do Tempo</button>
+            <button class="tab-button" onclick="switchTab(event, 'table')">📊 Tabela de Dados</button>
+        </div>
+        <div id="timeline" class="tab-content active">
+            <div id="timeline-embed"></div>
+        </div>
+        <div id="table" class="tab-content">
+            <div id="table-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 🔧 COLOQUE O SEU LINK DO GOOGLE SHEETS (PUBLICADO COMO CSV) AQUI
+        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBLCU1xQeNk3vWC31Ezn7i6GdekRUrDik751Zbp5nKzA2NlmUqOVec6daZySyNevB39YCVJDHp8wya/pub?gid=1638839728&single=true&output=csv';
+
+        let rawData = [];
+
+        // Função para alternar abas
+        window.switchTab = function(event, tabId) {
+            // Esconde todos os conteúdos
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Remove active de todos os botões
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Mostra o selecionado
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Função para converter os dados da planilha no formato que o TimelineJS entende
+        function convertToTimelineFormat(data) {
+            // Mapeia os cabeçalhos para encontrar as colunas certas (case insensitive)
+            const headers = data[0].map(h => h.toLowerCase());
+            
+            const titleIndex = headers.findIndex(h => h.includes('titulo') || h.includes('title') || h === 'nome');
+            const dateIndex = headers.findIndex(h => h.includes('data') || h === 'date');
+            const textIndex = headers.findIndex(h => h.includes('descricao') || h.includes('description') || h === 'texto');
+            const mediaIndex = headers.findIndex(h => h.includes('imagem') || h.includes('media') || h.includes('url'));
+            
+            // Se não encontrou colunas essenciais, usa as primeiras como fallback
+            const finalTitleIndex = titleIndex !== -1 ? titleIndex : 0;
+            const finalDateIndex = dateIndex !== -1 ? dateIndex : 1;
+            const finalTextIndex = textIndex !== -1 ? textIndex : 2;
+            const finalMediaIndex = mediaIndex !== -1 ? mediaIndex : 3;
+
+            // Pula o cabeçalho e converte cada linha
+            const timelineEvents = data.slice(1).map(row => {
+                // Extrai só ano, mês e dia se possível (para o TimelineJS)
+                let dateStr = row[finalDateIndex] || '';
+                let year = '', month = '', day = '';
+                // Tenta extrair data no formato YYYY-MM-DD ou DD/MM/YYYY
+                if (dateStr.match(/\d{4}-\d{2}-\d{2}/)) {
+                    let parts = dateStr.split('-');
+                    year = parts[0];
+                    month = parts[1];
+                    day = parts[2];
+                } else if (dateStr.match(/\d{2}\/\d{2}\/\d{4}/)) {
+                    let parts = dateStr.split('/');
+                    year = parts[2];
+                    month = parts[1];
+                    day = parts[0];
+                } else {
+                    // Se não encontrou formato específico, tenta pegar só o ano
+                    let yearMatch = dateStr.match(/\d{4}/);
+                    year = yearMatch ? yearMatch[0] : dateStr;
+                }
+
+                return {
+                    "year": year,
+                    "month": month,
+                    "day": day,
+                    "headline": row[finalTitleIndex] || "Sem Título",
+                    "text": row[finalTextIndex] || "",
+                    "media": {
+                        "url": row[finalMediaIndex] || "",
+                        "caption": ""
+                    }
+                };
+            }).filter(event => event.year); // Remove eventos sem data
+
+            return timelineEvents;
+        }
+
+        // Função para renderizar a timeline
+        function renderTimeline(data) {
+            const timelineJson = convertToTimelineFormat(data);
+            
+            // Cria o objeto de timeline
+            const timelineConfig = {
+                "title": {
+                    "media": {
+                        "url": "",
+                        "caption": ""
+                    },
+                    "text": {
+                        "headline": "Minha Linha do Tempo",
+                        "text": "<p>Dados carregados da planilha automaticamente</p>"
+                    }
+                },
+                "events": timelineJson
+            };
+
+            // Limpa e cria a timeline
+            document.getElementById('timeline-embed').innerHTML = '';
+            window.timeline = new TL.Timeline('timeline-embed', timelineConfig);
+        }
+
+        // Função para renderizar a tabela HTML
+        function renderTable(data) {
+            if (!data || data.length === 0) return;
+            
+            let html = '<div style="overflow-x: auto;"><table><thead><tr>';
+            // Cabeçalhos
+            data[0].forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Dados
+            for (let i = 1; i < data.length; i++) {
+                html += '<tr>';
+                data[i].forEach(cell => {
+                    html += `<td>${cell || ''}</td>`;
+                });
+                html += '</tr>';
+            }
+            html += '</tbody></table></div>';
+            
+            document.getElementById('table-content').innerHTML = html;
+        }
+
+        // Carrega os dados do Google Sheets
+        function loadData() {
+            const timelineDiv = document.getElementById('timeline-embed');
+            const tableDiv = document.getElementById('table-content');
+            
+            timelineDiv.innerHTML = '<div class="loading">⏳ Carregando dados da planilha...</div>';
+            tableDiv.innerHTML = '<div class="loading">⏳ Carregando...</div>';
+
+            // Usa o Papa Parse para ler o CSV da URL pública
+            Papa.parse(GOOGLE_SHEET_CSV_URL, {
+                download: true,
+                header: false, // Mantém como array de arrays para flexibilidade
+                complete: function(results) {
+                    rawData = results.data;
+                    if (rawData && rawData.length > 1) {
+                        renderTimeline(rawData);
+                        renderTable(rawData);
+                    } else {
+                        timelineDiv.innerHTML = '<div class="error">❌ Nenhum dado encontrado na planilha. Verifique se ela tem pelo menos 2 linhas (cabeçalho + dados).</div>';
+                        tableDiv.innerHTML = '<div class="error">❌ Nenhum dado encontrado.</div>';
+                    }
+                },
+                error: function(error) {
+                    console.error('Erro:', error);
+                    timelineDiv.innerHTML = '<div class="error">❌ Erro ao carregar a planilha. Verifique se o link está correto e se a planilha está publicada como CSV.</div>';
+                    tableDiv.innerHTML = '<div class="error">❌ Erro ao carregar os dados.</div>';
+                }
+            });
+        }
+
+        // Inicia o carregamento quando a página carregar
+        window.addEventListener('DOMContentLoaded', () => {
+            if (GOOGLE_SHEET_CSV_URL === 'SEU_LINK_DO_CSV_AQUI') {
+                document.getElementById('timeline-embed').innerHTML = '<div class="error">⚠️ Configure a variável GOOGLE_SHEET_CSV_URL no código com o link da sua planilha publicada.</div>';
+                document.getElementById('table-content').innerHTML = '<div class="error">⚠️ Configure a URL da planilha.</div>';
+                return;
+            }
+            loadData();
+        });
+    </script>
+    <!-- Biblioteca do TimelineJS -->
+    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+</body>
+</html>
