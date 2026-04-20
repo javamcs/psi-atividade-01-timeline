@@ -6,182 +6,52 @@
     <title>Trabalho de Psicologia - Timeline</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/gh/squarechip/timeline/dist/css/timeline.min.css" rel="stylesheet">
     <style>
-        #timeline-embed.vertical-timeline-wrap {
-            max-height: min(72vh, 44rem);
-            overflow-y: auto;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-            border: 1px solid color-mix(in srgb, var(--bs-primary) 12%, var(--bs-border-color)) !important;
-            border-radius: 0.65rem !important;
-            background:
-                radial-gradient(120% 80% at 0% -20%, color-mix(in srgb, var(--bs-primary) 9%, transparent), transparent 55%),
-                linear-gradient(180deg, var(--bs-body-bg) 0%, color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-secondary-bg)) 100%);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.75),
-                0 0.35rem 1.25rem rgba(0, 0, 0, 0.06);
+        #timeline-embed {
+            border: 1px solid color-mix(in srgb, var(--bs-primary) 12%, var(--bs-border-color));
+            border-radius: 0.65rem;
+            background: var(--bs-body-bg);
         }
-        ol.vertical-timeline {
-            --vt-rail-x: 5.25rem;
-            list-style: none;
-            margin: 0;
-            padding: 0.5rem 0 0.75rem;
-            padding-inline-start: 0 !important;
-            counter-reset: none;
-            position: relative;
+        #timeline-embed .timeline__content {
+            border: 1px solid color-mix(in srgb, var(--bs-primary) 10%, var(--bs-border-color));
+            border-radius: 0.6rem;
+            box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.06);
+            background: color-mix(in srgb, var(--bs-body-bg) 97%, var(--bs-primary) 3%);
+            padding: 1rem 1.1rem;
         }
-        ol.vertical-timeline::before {
-            content: '';
-            position: absolute;
-            left: var(--vt-rail-x);
-            top: 0.85rem;
-            bottom: 0.85rem;
-            width: 2px;
-            transform: translateX(-50%);
-            border-radius: 4px;
-            background: linear-gradient(
-                180deg,
-                color-mix(in srgb, var(--bs-primary) 70%, transparent) 0%,
-                color-mix(in srgb, var(--bs-primary) 22%, var(--bs-border-color)) 22%,
-                var(--bs-border-color) 50%,
-                color-mix(in srgb, var(--bs-border-color) 55%, transparent) 100%
-            );
-            box-shadow: 0 0 20px color-mix(in srgb, var(--bs-primary) 18%, transparent);
-            z-index: 0;
-            pointer-events: none;
-        }
-        .vertical-timeline-item {
-            position: relative;
-            list-style: none;
-            margin: 0;
-            padding: 0 0 1.85rem 0;
-            padding-left: 6.85rem;
-            padding-inline-start: 6.85rem !important;
-        }
-        .vertical-timeline-item:last-child {
-            padding-bottom: 0.35rem;
-        }
-        .vertical-timeline-year {
-            position: absolute;
-            left: 0;
-            top: 0.48rem;
-            width: 4.25rem;
-            text-align: right;
-            padding: 0.2rem 0.4rem 0.2rem 0;
-            font-weight: 800;
-            font-size: 1.125rem;
-            line-height: 1.2;
-            letter-spacing: -0.03em;
-            font-variant-numeric: tabular-nums;
+        #timeline-embed .timeline__content h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
             color: var(--bs-primary);
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
-            z-index: 2;
-        }
-        .vertical-timeline-dot {
-            position: absolute;
-            left: var(--vt-rail-x);
-            top: 0.92rem;
-            width: 0.9375rem;
-            height: 0.9375rem;
-            margin: 0;
-            padding: 0;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at 32% 28%, #fff 0%, color-mix(in srgb, #fff 35%, var(--bs-primary)) 28%, var(--bs-primary) 72%);
-            border: 3px solid var(--bs-body-bg);
-            box-shadow:
-                0 0 0 2px color-mix(in srgb, var(--bs-primary) 40%, transparent),
-                0 2px 6px rgba(0, 0, 0, 0.12);
-            z-index: 3;
-            transition: transform 0.22s ease, box-shadow 0.22s ease;
-        }
-        .vertical-timeline-item:hover .vertical-timeline-dot {
-            transform: translate(-50%, -50%) scale(1.12);
-            box-shadow:
-                0 0 0 3px color-mix(in srgb, var(--bs-primary) 28%, transparent),
-                0 3px 10px rgba(0, 0, 0, 0.14);
-        }
-        .vertical-timeline-card {
-            position: relative;
-            margin: 0;
-            overflow: hidden;
-            border: 1px solid color-mix(in srgb, var(--bs-primary) 10%, var(--bs-border-color)) !important;
-            border-radius: 0.6rem !important;
-            background: color-mix(in srgb, var(--bs-body-bg) 97%, var(--bs-primary) 3%) !important;
-            box-shadow:
-                0 1px 2px rgba(0, 0, 0, 0.04),
-                0 0.5rem 1.25rem rgba(0, 0, 0, 0.06) !important;
-            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-        }
-        .vertical-timeline-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: 3px;
-            background: linear-gradient(
-                90deg,
-                var(--bs-primary),
-                color-mix(in srgb, var(--bs-primary) 55%, var(--bs-info))
-            );
-            opacity: 0.92;
-            pointer-events: none;
-        }
-        .vertical-timeline-item:hover .vertical-timeline-card {
-            transform: translateY(-2px);
-            border-color: color-mix(in srgb, var(--bs-primary) 26%, var(--bs-border-color)) !important;
-            box-shadow:
-                0 1px 2px rgba(0, 0, 0, 0.05),
-                0 0.75rem 1.75rem rgba(0, 0, 0, 0.09) !important;
-        }
-        .vertical-timeline-card .card-body {
-            padding: 1.1rem 1.25rem 1.15rem;
-        }
-        .vertical-timeline-card .vt-body > p > strong.text-body {
-            font-size: 0.65rem;
             font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--bs-secondary-color) !important;
         }
-        .vertical-timeline-card .vt-body > p:nth-child(4).fw-semibold {
-            margin-top: 0 !important;
-            margin-bottom: 0.35rem !important;
-        }
-        .vertical-timeline-card .vt-body > p:nth-child(6).fw-semibold {
-            margin-top: 1rem !important;
-            margin-bottom: 0.35rem !important;
-        }
-        .vertical-timeline-card .vt-body p.fw-semibold {
+        #timeline-embed .vt-label {
+            margin-bottom: 0.2rem;
             font-size: 0.7rem;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            color: var(--bs-body-color);
-        }
-        .vertical-timeline-card .vt-body .js-vt-ideias {
-            font-size: 0.9rem;
-            line-height: 1.55;
             color: var(--bs-secondary-color);
         }
-        .vertical-timeline-card .vt-body .js-vt-ref {
-            font-size: 0.82rem;
+        #timeline-embed .vt-value {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
             line-height: 1.5;
+            color: var(--bs-body-color);
         }
-        .vertical-timeline-card .vt-body :last-child {
-            margin-bottom: 0;
+        #timeline-embed .vt-figure {
+            margin: 0 0 0.85rem;
         }
-        .vertical-timeline-card .vt-body img {
+        #timeline-embed .vt-figure img {
             max-width: 100%;
             height: auto;
             border-radius: 0.45rem;
             box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
         }
-        ol.vertical-timeline > li.vertical-timeline-placeholder {
-            list-style: none !important;
-            margin: 0 !important;
-            padding: 1.25rem 0.5rem !important;
-            padding-inline-start: 0.5rem !important;
+        #timeline-embed .timeline__item--placeholder {
+            list-style: none;
+        }
+        #timeline-embed .timeline__item--placeholder .timeline__content {
             text-align: center;
         }
         .table-sticky thead th {
@@ -257,8 +127,10 @@
             <div class="card-body p-0">
                 <div class="tab-content" id="mainTabContent">
                     <div class="tab-pane fade show active p-3" id="timeline-pane" role="tabpanel" aria-labelledby="timeline-tab" tabindex="0">
-                        <div id="timeline-embed" class="vertical-timeline-wrap border rounded bg-white p-3 p-md-4">
-                            <ol id="vertical-timeline-list" class="vertical-timeline mb-0"></ol>
+                        <div id="timeline-embed" class="timeline bg-white p-3 p-md-4" data-mode="vertical" data-vertical-start-position="right" data-vertical-trigger="150px">
+                            <div class="timeline__wrap">
+                                <div id="vertical-timeline-list" class="timeline__items"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="tab-pane fade p-3" id="table-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
@@ -270,33 +142,33 @@
     </div>
 
     <template id="timeline-item-template">
-        <li class="vertical-timeline-item">
-            <span class="vertical-timeline-year js-vt-year"></span>
-            <span class="vertical-timeline-dot" aria-hidden="true"></span>
-            <article class="card vertical-timeline-card border-0 shadow-sm">
-                <div class="card-body">
-                    <figure class="vt-figure mb-3 d-none">
-                        <img class="img-fluid rounded js-vt-img" alt="">
-                    </figure>
-                    <div class="vt-body small">
-                        <p class="mb-2 text-body-secondary"><strong class="text-body">Corrente psicológica:</strong> <span class="js-vt-corrente"></span></p>
-                        <p class="mb-2 text-body-secondary"><strong class="text-body">Autor:</strong> <span class="js-vt-autor"></span></p>
-                        <p class="mb-2 text-body-secondary"><strong class="text-body">Ano:</strong> <span class="js-vt-ano"></span></p>
-                        <p class="mb-1 text-body fw-semibold">Ideias:</p>
-                        <div class="mb-0 text-body-secondary js-vt-ideias"></div>
-                        <p class="mb-1 mt-3 text-body fw-semibold">Referência</p>
-                        <div class="mb-0 text-body-secondary small js-vt-ref"></div>
-                    </div>
-                </div>
-            </article>
-        </li>
+        <div class="timeline__item">
+            <div class="timeline__content">
+                <h2 class="js-vt-year"></h2>
+                <figure class="vt-figure d-none">
+                    <img class="js-vt-img" alt="">
+                </figure>
+                <p class="vt-label mb-0">Corrente psicológica</p>
+                <p class="vt-value js-vt-corrente"></p>
+                <p class="vt-label mb-0">Autor</p>
+                <p class="vt-value js-vt-autor"></p>
+                <p class="vt-label mb-0">Ano</p>
+                <p class="vt-value js-vt-ano"></p>
+                <p class="vt-label mb-0">Ideias</p>
+                <div class="vt-value js-vt-ideias"></div>
+                <p class="vt-label mt-2 mb-0">Referência</p>
+                <div class="vt-value mb-0 js-vt-ref"></div>
+            </div>
+        </div>
     </template>
 
+    <script src="https://cdn.jsdelivr.net/gh/squarechip/timeline/dist/js/timeline.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBLCU1xQeNk3vWC31Ezn7i6GdekRUrDik751Zbp5nKzA2NlmUqOVec6daZySyNevB39YCVJDHp8wya/pub?gid=1638839728&single=true&output=csv';
 
         let rawData = [];
+        let timelineInstance = null;
 
         function spreadsheetViewUrlFromCsvUrl(csvUrl) {
             return String(csvUrl)
@@ -591,6 +463,7 @@
                 const anoEl = node.querySelector('.js-vt-ano');
                 const ideiasEl = node.querySelector('.js-vt-ideias');
                 const refEl = node.querySelector('.js-vt-ref');
+                const item = node.querySelector('.timeline__item');
                 const fig = node.querySelector('.vt-figure');
                 const img = node.querySelector('.js-vt-img');
 
@@ -598,6 +471,9 @@
                 correnteEl.textContent = ev.corrente || '—';
                 autorEl.textContent = ev.autorLinha || '';
                 anoEl.textContent = ev.anoLinha || ev.year || '—';
+                if (item) {
+                    item.setAttribute('data-time', ev.year || '');
+                }
 
                 const cit = ev.citacaoHtml;
                 let ideiasBlock = (ev.ideiasHtml && ev.ideiasHtml !== '—') ? ev.ideiasHtml : '';
@@ -630,13 +506,26 @@
             });
 
             if (events.length === 0) {
-                list.innerHTML = '<li class="vertical-timeline-placeholder list-unstyled text-muted small">Nenhum registro com ano válido para exibir na linha do tempo.</li>';
+                list.innerHTML = '<div class="timeline__item timeline__item--placeholder"><div class="timeline__content text-muted small">Nenhum registro com ano válido para exibir na linha do tempo.</div></div>';
+            }
+
+            if (timelineInstance && typeof timelineInstance.destroy === 'function') {
+                timelineInstance.destroy();
+                timelineInstance = null;
+            }
+
+            if (typeof timeline === 'function') {
+                timelineInstance = timeline(document.querySelectorAll('.timeline'), {
+                    mode: 'vertical',
+                    verticalStartPosition: 'right',
+                    verticalTrigger: '150px'
+                });
             }
         }
 
         function verticalTimelinePlaceholderHtml(inner) {
-            return '<li class="vertical-timeline-placeholder list-unstyled">' +
-                '<div class="px-2">' + inner + '</div></li>';
+            return '<div class="timeline__item timeline__item--placeholder"><div class="timeline__content">' +
+                '<div class="px-2">' + inner + '</div></div></div>';
         }
 
         const TABLE_HEADERS_7 = [
