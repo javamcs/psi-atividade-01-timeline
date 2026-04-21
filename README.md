@@ -1,1 +1,1 @@
-# psi-atividade-01-timeline
+Projeto desenvolvido como parte de uma atividade acadêmica no Centro Universitário UniDomBosco (2026).
