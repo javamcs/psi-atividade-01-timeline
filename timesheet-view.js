@@ -55,6 +55,20 @@ function sortTimesheetEntries(entries, mode) {
         const endB = parseInt(b[1], 10);
         const highlightA = parseInt(a[4], 10);
         const highlightB = parseInt(b[4], 10);
+        const correnteA = String(a[5] || '').trim();
+        const correnteB = String(b[5] || '').trim();
+
+        if (mode === 'corrente') {
+            if (correnteA && !correnteB) return -1;
+            if (!correnteA && correnteB) return 1;
+            const correnteCmp = correnteA.localeCompare(correnteB, 'pt-BR');
+            if (correnteCmp !== 0) return correnteCmp;
+            const labelCmp = String(a[2]).localeCompare(String(b[2]), 'pt-BR');
+            if (labelCmp !== 0) return labelCmp;
+            if (startA !== startB) return startA - startB;
+            if (endA !== endB) return endA - endB;
+            return 0;
+        }
 
         if (mode === 'destaque') {
             if (!isNaN(highlightA) && !isNaN(highlightB) && highlightA !== highlightB) return highlightA - highlightB;
@@ -139,6 +153,25 @@ function applyHighlightMarkers(host, entries, bounds) {
             yearLabel.style.pointerEvents = 'none';
             row.appendChild(yearLabel);
         };
+
+        if (!isNaN(highlightYear) && highlightYear >= bounds.minYear && highlightYear <= bounds.maxYear) {
+            const marker = document.createElement('span');
+            marker.className = 'ts-highlight-marker';
+            marker.title = 'Ano de destaque: ' + highlightYear;
+            marker.style.position = 'absolute';
+            marker.style.left = ((highlightYear - bounds.minYear) * yearWidth) + 'px';
+            marker.style.top = '8px';
+            marker.style.width = '6px';
+            marker.style.height = '6px';
+            marker.style.background = '#ffffff';
+            marker.style.border = '1px solid var(--bs-secondary)';
+            marker.style.borderRadius = '50%';
+            marker.style.transform = 'translateX(-50%)';
+            marker.style.opacity = '0.95';
+            marker.style.zIndex = '2';
+            marker.style.pointerEvents = 'none';
+            row.appendChild(marker);
+        }
 
         appendYearBadge(highlightYear, 'ts-highlight-year');
 
@@ -249,6 +282,7 @@ function renderTimesheet(data) {
         <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
             <label for="timesheet-sort-select" class="small text-muted mb-0">Ordenar por:</label>
             <select id="timesheet-sort-select" class="form-select form-select-sm" style="width: auto;">
+                <option value="corrente">Corrente (A-Z)</option>
                 <option value="destaque">Ano Destaque</option>
                 <option value="obito">Óbito/Atual</option>
                 <option value="vida">Nascimento</option>
@@ -289,7 +323,7 @@ function renderTimesheet(data) {
             sortSelect.value = timesheetSortMode;
             sortSelect.addEventListener('change', event => {
                 const newMode = event.target.value;
-                timesheetSortMode = newMode === 'vida' || newMode === 'destaque' ? newMode : 'obito';
+                timesheetSortMode = newMode === 'vida' || newMode === 'destaque' || newMode === 'corrente' ? newMode : 'obito';
                 draw();
             });
         }
