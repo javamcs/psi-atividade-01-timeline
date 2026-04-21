@@ -4,6 +4,8 @@ function formatLifeRangeLabel(nascYear, obitoYear) {
     return '(' + start + '-' + end + ')';
 }
 
+let timesheetSortMode = 'obito';
+
 function toTimesheetEntry(psychRow) {
     const birth = parseDateParts(psychRow.nascRaw);
     const death = parseDateParts(psychRow.obitoRaw);
@@ -40,6 +42,29 @@ function buildTimesheetEntries(data) {
     });
 
     return entries;
+}
+
+function sortTimesheetEntries(entries, mode) {
+    const sorted = entries.slice();
+
+    sorted.sort((a, b) => {
+        const startA = parseInt(a[0], 10);
+        const startB = parseInt(b[0], 10);
+        const endA = parseInt(a[1], 10);
+        const endB = parseInt(b[1], 10);
+
+        if (mode === 'vida') {
+            if (startA !== startB) return startA - startB;
+            if (endA !== endB) return endA - endB;
+        } else {
+            if (endA !== endB) return endA - endB;
+            if (startA !== startB) return startA - startB;
+        }
+
+        return String(a[2]).localeCompare(String(b[2]), 'pt-BR');
+    });
+
+    return sorted;
 }
 
 function getTimesheetBounds(entries) {
@@ -92,20 +117,20 @@ function renderTimesheet(data) {
         return;
     }
 
-    const entries = buildTimesheetEntries(data);
+    const baseEntries = buildTimesheetEntries(data);
     console.group('[Timesheet] Debug');
     console.log('Total de linhas brutas (sem cabeçalho):', Math.max((data?.length || 1) - 1, 0));
-    console.log('Entradas convertidas para Timesheet:', entries.length);
-    console.log('Preview das 10 primeiras entradas:', entries.slice(0, 10));
+    console.log('Entradas convertidas para Timesheet:', baseEntries.length);
+    console.log('Preview das 10 primeiras entradas:', baseEntries.slice(0, 10));
 
-    if (entries.length === 0) {
+    if (baseEntries.length === 0) {
         console.warn('Nenhuma entrada válida para desenhar.');
         console.groupEnd();
         container.innerHTML = errorHtml('Nenhum dado com nascimento/óbito válido para o Timesheet.');
         return;
     }
 
-    const bounds = getTimesheetBounds(entries);
+    const bounds = getTimesheetBounds(baseEntries);
     if (!bounds) {
         console.warn('Sem intervalo de anos válido.');
         console.groupEnd();
@@ -123,9 +148,19 @@ function renderTimesheet(data) {
         bounds.maxYear
     );
 
-    container.innerHTML = '<div id="timesheet"></div>';
+    container.innerHTML = `
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <label for="timesheet-sort-select" class="small text-muted mb-0">Ordenar por:</label>
+            <select id="timesheet-sort-select" class="form-select form-select-sm" style="width: auto;">
+                <option value="obito">Óbito/Atual</option>
+                <option value="vida">Nascimento</option>
+            </select>
+        </div>
+        <div id="timesheet"></div>
+    `;
 
     const draw = () => {
+        const entries = sortTimesheetEntries(baseEntries, timesheetSortMode);
         const host = document.getElementById('timesheet');
         if (!host) return;
         host.innerHTML = '';
@@ -137,6 +172,15 @@ function renderTimesheet(data) {
 
     // Ensure drawing happens after layout is settled (tab visible + measured width).
     requestAnimationFrame(() => {
+        const sortSelect = document.getElementById('timesheet-sort-select');
+        if (sortSelect) {
+            sortSelect.value = timesheetSortMode;
+            sortSelect.addEventListener('change', event => {
+                timesheetSortMode = event.target.value === 'vida' ? 'vida' : 'obito';
+                draw();
+            });
+        }
+
         draw();
         const firstScaleCell = container.querySelector('#timesheet .scale section');
         console.log('Largura da primeira célula da escala:', firstScaleCell ? firstScaleCell.offsetWidth : 0);
