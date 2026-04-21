@@ -96,25 +96,43 @@ function applyTimesheetTheme(host) {
     const primary = rootStyles.getPropertyValue('--bs-primary').trim() || '#0d6efd';
     const bodyColor = rootStyles.getPropertyValue('--bs-body-color').trim() || '#212529';
     const secondary = rootStyles.getPropertyValue('--bs-secondary-color').trim() || '#6c757d';
+    const borderColor = rootStyles.getPropertyValue('--bs-border-color').trim() || '#dee2e6';
 
     host.querySelectorAll('.data li .bubble').forEach(bubble => {
         bubble.style.backgroundColor = primary;
-        bubble.style.opacity = '0.9';
-        bubble.style.top = '9px';
+        bubble.style.opacity = '1';
+        bubble.style.top = '10px';
+        bubble.style.height = '8px';
     });
 
     host.querySelectorAll('.data li .label').forEach(label => {
         label.style.color = bodyColor;
+        label.style.fontSize = '11.5px';
+        label.style.fontWeight = '600';
+        label.style.letterSpacing = '0.01em';
+        label.style.textShadow = '0 1px 0 rgba(255,255,255,0.65)';
     });
 
     host.querySelectorAll('.data li').forEach(row => {
-        row.style.height = '24px';
-        row.style.lineHeight = '24px';
-        row.style.marginBottom = '6px';
+        row.style.height = '28px';
+        row.style.lineHeight = '28px';
+        row.style.marginBottom = '8px';
     });
 
     host.querySelectorAll('.scale section.ts-decade .ts-decade-label').forEach(label => {
         label.style.color = secondary;
+        label.style.fontSize = '10px';
+        label.style.fontWeight = '700';
+        label.style.textShadow = '0 1px 0 rgba(255,255,255,0.55)';
+    });
+
+    host.querySelectorAll('.data li .date').forEach(dateEl => {
+        dateEl.style.color = secondary;
+        dateEl.style.fontSize = '10px';
+    });
+
+    host.querySelectorAll('.data li').forEach(row => {
+        row.style.borderBottom = '1px solid color-mix(in srgb, ' + borderColor + ' 60%, transparent)';
     });
 }
 
@@ -140,15 +158,17 @@ function applyHighlightMarkers(host, entries, bounds) {
             yearLabel.textContent = String(year);
             yearLabel.style.position = 'absolute';
             yearLabel.style.left = ((year - bounds.minYear) * yearWidth) + 'px';
-            yearLabel.style.top = '-7px';
+            yearLabel.style.top = '-9px';
             yearLabel.style.transform = 'translateX(-50%)';
-            yearLabel.style.fontSize = '9px';
+            yearLabel.style.fontSize = '10px';
+            yearLabel.style.fontWeight = '600';
             yearLabel.style.lineHeight = '1';
-            yearLabel.style.padding = '2px 5px';
+            yearLabel.style.padding = '2px 6px';
             yearLabel.style.borderRadius = '999px';
             yearLabel.style.background = 'var(--bs-body-bg, #fff)';
             yearLabel.style.border = '1px solid var(--bs-border-color, #dee2e6)';
-            yearLabel.style.color = 'var(--bs-secondary-color, #6c757d)';
+            yearLabel.style.color = 'var(--bs-body-color, #212529)';
+            yearLabel.style.boxShadow = '0 1px 2px rgba(15, 23, 42, 0.08)';
             yearLabel.style.zIndex = '3';
             yearLabel.style.pointerEvents = 'none';
             row.appendChild(yearLabel);
@@ -160,7 +180,7 @@ function applyHighlightMarkers(host, entries, bounds) {
             marker.title = 'Ano de destaque: ' + highlightYear;
             marker.style.position = 'absolute';
             marker.style.left = ((highlightYear - bounds.minYear) * yearWidth) + 'px';
-            marker.style.top = '8px';
+            marker.style.top = '11px';
             marker.style.width = '6px';
             marker.style.height = '6px';
             marker.style.background = '#ffffff';
@@ -181,15 +201,17 @@ function applyHighlightMarkers(host, entries, bounds) {
             correnteLabel.textContent = corrente;
             correnteLabel.style.position = 'absolute';
             correnteLabel.style.left = ((startYear - bounds.minYear) * yearWidth - 8) + 'px';
-            correnteLabel.style.top = '4px';
+            correnteLabel.style.top = '6px';
             correnteLabel.style.transform = 'translateX(-100%)';
-            correnteLabel.style.fontSize = '9px';
+            correnteLabel.style.fontSize = '10px';
+            correnteLabel.style.fontWeight = '600';
             correnteLabel.style.lineHeight = '1';
-            correnteLabel.style.padding = '2px 5px';
+            correnteLabel.style.padding = '2px 6px';
             correnteLabel.style.borderRadius = '999px';
             correnteLabel.style.background = 'var(--bs-body-bg, #fff)';
             correnteLabel.style.border = '1px solid var(--bs-border-color, #dee2e6)';
-            correnteLabel.style.color = 'var(--bs-secondary-color, #6c757d)';
+            correnteLabel.style.color = 'var(--bs-body-color, #212529)';
+            correnteLabel.style.boxShadow = '0 1px 2px rgba(15, 23, 42, 0.08)';
             correnteLabel.style.zIndex = '3';
             correnteLabel.style.pointerEvents = 'none';
             row.appendChild(correnteLabel);
@@ -210,10 +232,10 @@ function getTimesheetBounds(entries) {
 
     if (!isFinite(minYear) || !isFinite(maxYear)) return null;
 
-    // Respiro no início: evita que a primeira barra fique colada/cortada na borda esquerda.
-    const minPadded = Math.max(1, minYear - 10);
-    // Respiro no fim: espaço à direita para a última barra e leitura da escala.
-    const maxPadded = maxYear + 30;
+    // Respiro maior no início para acomodar badge de corrente e evitar cortes.
+    const minPadded = Math.max(1, minYear - 30);
+    // Respiro maior no fim para manter labels totalmente visíveis.
+    const maxPadded = maxYear + 60;
 
     return { minYear: minPadded, maxYear: maxPadded, dataMinYear: minYear, dataMaxYear: maxYear };
 }
