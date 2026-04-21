@@ -304,7 +304,9 @@ function renderTimesheet(data) {
                 <option value="vida">Nascimento</option>
             </select>
         </div>
-        <div id="timesheet"></div>
+        <div id="timesheet-scroll" style="overflow-x: auto; overflow-y: hidden;">
+            <div id="timesheet"></div>
+        </div>
     `;
 
     const draw = () => {
@@ -314,10 +316,15 @@ function renderTimesheet(data) {
         host.innerHTML = '';
         const timesheetData = entries.map(entry => entry.slice(0, 4));
         new Timesheet('timesheet', bounds.minYear, bounds.maxYear, timesheetData);
-        container.style.overflowY = 'hidden';
-        container.style.overflowX = 'auto';
+        container.style.overflowY = 'visible';
+        container.style.overflowX = 'visible';
         container.style.maxHeight = 'none';
         container.style.paddingBottom = '12px';
+        const scrollWrap = document.getElementById('timesheet-scroll');
+        if (scrollWrap) {
+            scrollWrap.style.overflowX = 'auto';
+            scrollWrap.style.overflowY = 'hidden';
+        }
         host.style.height = 'auto';
         host.style.minHeight = '0';
         host.style.overflowY = 'hidden';
