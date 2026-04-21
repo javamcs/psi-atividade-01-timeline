@@ -4,7 +4,7 @@ function formatLifeRangeLabel(nascYear, obitoYear) {
     return '(' + start + '-' + end + ')';
 }
 
-let timesheetSortMode = 'obito';
+let timesheetSortMode = 'destaque';
 
 function toTimesheetEntry(psychRow) {
     const birth = parseDateParts(psychRow.nascRaw);
@@ -23,10 +23,11 @@ function toTimesheetEntry(psychRow) {
         endYear = startYear;
     }
 
-    const corrente = psychRow.corrente ? ' - ' + psychRow.corrente : '';
-    const label = psychRow.autor + ' ' + formatLifeRangeLabel(nascYear, obitoYear) + corrente;
+    const corrente = psychRow.corrente ? String(psychRow.corrente).trim() : '';
+    const label = psychRow.autor + ' ' + formatLifeRangeLabel(nascYear, obitoYear);
 
-    return [startYear, endYear, label, 'lorem'];
+    const highlight = parseDateParts(psychRow.anoRaw).year || parseDateParts(psychRow.marcoRaw).year || '';
+    return [startYear, endYear, label, 'lorem', highlight, corrente];
 }
 
 function buildTimesheetEntries(data) {
@@ -52,8 +53,16 @@ function sortTimesheetEntries(entries, mode) {
         const startB = parseInt(b[0], 10);
         const endA = parseInt(a[1], 10);
         const endB = parseInt(b[1], 10);
+        const highlightA = parseInt(a[4], 10);
+        const highlightB = parseInt(b[4], 10);
 
-        if (mode === 'vida') {
+        if (mode === 'destaque') {
+            if (!isNaN(highlightA) && !isNaN(highlightB) && highlightA !== highlightB) return highlightA - highlightB;
+            if (isNaN(highlightA) && !isNaN(highlightB)) return 1;
+            if (!isNaN(highlightA) && isNaN(highlightB)) return -1;
+            if (startA !== startB) return startA - startB;
+            if (endA !== endB) return endA - endB;
+        } else if (mode === 'vida') {
             if (startA !== startB) return startA - startB;
             if (endA !== endB) return endA - endB;
         } else {
@@ -65,6 +74,94 @@ function sortTimesheetEntries(entries, mode) {
     });
 
     return sorted;
+}
+
+function applyTimesheetTheme(host) {
+    if (!host) return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primary = rootStyles.getPropertyValue('--bs-primary').trim() || '#0d6efd';
+    const bodyColor = rootStyles.getPropertyValue('--bs-body-color').trim() || '#212529';
+    const secondary = rootStyles.getPropertyValue('--bs-secondary-color').trim() || '#6c757d';
+
+    host.querySelectorAll('.data li .bubble').forEach(bubble => {
+        bubble.style.backgroundColor = primary;
+        bubble.style.opacity = '0.9';
+        bubble.style.top = '9px';
+    });
+
+    host.querySelectorAll('.data li .label').forEach(label => {
+        label.style.color = bodyColor;
+    });
+
+    host.querySelectorAll('.data li').forEach(row => {
+        row.style.height = '24px';
+        row.style.lineHeight = '24px';
+        row.style.marginBottom = '6px';
+    });
+
+    host.querySelectorAll('.scale section.ts-decade .ts-decade-label').forEach(label => {
+        label.style.color = secondary;
+    });
+}
+
+function applyHighlightMarkers(host, entries, bounds) {
+    if (!host) return;
+    const scaleCell = host.querySelector('.scale section');
+    const yearWidth = scaleCell ? scaleCell.offsetWidth : 0;
+    if (!yearWidth || !bounds) return;
+
+    const rows = host.querySelectorAll('.data li');
+    rows.forEach((row, idx) => {
+        const entry = entries[idx];
+        if (!entry) return;
+        const startYear = parseInt(entry[0], 10);
+        const highlightYear = parseInt(entry[4], 10);
+        const corrente = entry[5] ? String(entry[5]).trim() : '';
+
+        const appendYearBadge = (year, className) => {
+            if (isNaN(year)) return;
+            if (year < bounds.minYear || year > bounds.maxYear) return;
+            const yearLabel = document.createElement('span');
+            yearLabel.className = className;
+            yearLabel.textContent = String(year);
+            yearLabel.style.position = 'absolute';
+            yearLabel.style.left = ((year - bounds.minYear) * yearWidth) + 'px';
+            yearLabel.style.top = '-7px';
+            yearLabel.style.transform = 'translateX(-50%)';
+            yearLabel.style.fontSize = '9px';
+            yearLabel.style.lineHeight = '1';
+            yearLabel.style.padding = '2px 5px';
+            yearLabel.style.borderRadius = '999px';
+            yearLabel.style.background = 'var(--bs-body-bg, #fff)';
+            yearLabel.style.border = '1px solid var(--bs-border-color, #dee2e6)';
+            yearLabel.style.color = 'var(--bs-secondary-color, #6c757d)';
+            yearLabel.style.zIndex = '3';
+            yearLabel.style.pointerEvents = 'none';
+            row.appendChild(yearLabel);
+        };
+
+        appendYearBadge(highlightYear, 'ts-highlight-year');
+
+        if (corrente && !isNaN(startYear)) {
+            const correnteLabel = document.createElement('span');
+            correnteLabel.className = 'ts-corrente-label';
+            correnteLabel.textContent = corrente;
+            correnteLabel.style.position = 'absolute';
+            correnteLabel.style.left = ((startYear - bounds.minYear) * yearWidth - 8) + 'px';
+            correnteLabel.style.top = '4px';
+            correnteLabel.style.transform = 'translateX(-100%)';
+            correnteLabel.style.fontSize = '9px';
+            correnteLabel.style.lineHeight = '1';
+            correnteLabel.style.padding = '2px 5px';
+            correnteLabel.style.borderRadius = '999px';
+            correnteLabel.style.background = 'var(--bs-body-bg, #fff)';
+            correnteLabel.style.border = '1px solid var(--bs-border-color, #dee2e6)';
+            correnteLabel.style.color = 'var(--bs-secondary-color, #6c757d)';
+            correnteLabel.style.zIndex = '3';
+            correnteLabel.style.pointerEvents = 'none';
+            row.appendChild(correnteLabel);
+        }
+    });
 }
 
 function getTimesheetBounds(entries) {
@@ -152,6 +249,7 @@ function renderTimesheet(data) {
         <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
             <label for="timesheet-sort-select" class="small text-muted mb-0">Ordenar por:</label>
             <select id="timesheet-sort-select" class="form-select form-select-sm" style="width: auto;">
+                <option value="destaque">Ano Destaque</option>
                 <option value="obito">Óbito/Atual</option>
                 <option value="vida">Nascimento</option>
             </select>
@@ -164,8 +262,22 @@ function renderTimesheet(data) {
         const host = document.getElementById('timesheet');
         if (!host) return;
         host.innerHTML = '';
-        new Timesheet('timesheet', bounds.minYear, bounds.maxYear, entries);
+        const timesheetData = entries.map(entry => entry.slice(0, 4));
+        new Timesheet('timesheet', bounds.minYear, bounds.maxYear, timesheetData);
+        container.style.overflowY = 'visible';
+        container.style.maxHeight = 'none';
+        container.style.paddingBottom = '12px';
+        host.style.height = 'auto';
+        host.style.minHeight = '0';
+        host.style.overflowY = 'visible';
+        const dataList = host.querySelector('.data');
+        if (dataList) {
+            dataList.style.overflow = 'visible';
+            dataList.style.maxHeight = 'none';
+        }
         applyDecadeScale(host);
+        applyTimesheetTheme(host);
+        applyHighlightMarkers(host, entries, bounds);
         container.scrollTop = 0;
         container.scrollLeft = 0;
     };
@@ -176,7 +288,8 @@ function renderTimesheet(data) {
         if (sortSelect) {
             sortSelect.value = timesheetSortMode;
             sortSelect.addEventListener('change', event => {
-                timesheetSortMode = event.target.value === 'vida' ? 'vida' : 'obito';
+                const newMode = event.target.value;
+                timesheetSortMode = newMode === 'vida' || newMode === 'destaque' ? newMode : 'obito';
                 draw();
             });
         }
