@@ -200,18 +200,12 @@ function applyHighlightMarkers(host, entries, bounds) {
             correnteLabel.className = 'ts-corrente-label';
             correnteLabel.textContent = corrente;
             correnteLabel.style.position = 'absolute';
-            correnteLabel.style.left = ((startYear - bounds.minYear) * yearWidth - 8) + 'px';
-            correnteLabel.style.top = '6px';
-            correnteLabel.style.transform = 'translateX(-100%)';
+            correnteLabel.style.left = ((startYear - bounds.minYear) * yearWidth) + 'px';
+            correnteLabel.style.top = '-10px';
             correnteLabel.style.fontSize = '10px';
             correnteLabel.style.fontWeight = '600';
             correnteLabel.style.lineHeight = '1';
-            correnteLabel.style.padding = '2px 6px';
-            correnteLabel.style.borderRadius = '999px';
-            correnteLabel.style.background = 'var(--bs-body-bg, #fff)';
-            correnteLabel.style.border = '1px solid var(--bs-border-color, #dee2e6)';
             correnteLabel.style.color = 'var(--bs-body-color, #212529)';
-            correnteLabel.style.boxShadow = '0 1px 2px rgba(15, 23, 42, 0.08)';
             correnteLabel.style.zIndex = '3';
             correnteLabel.style.pointerEvents = 'none';
             row.appendChild(correnteLabel);
@@ -320,15 +314,18 @@ function renderTimesheet(data) {
         host.innerHTML = '';
         const timesheetData = entries.map(entry => entry.slice(0, 4));
         new Timesheet('timesheet', bounds.minYear, bounds.maxYear, timesheetData);
-        container.style.overflowY = 'visible';
+        container.style.overflowY = 'hidden';
+        container.style.overflowX = 'auto';
         container.style.maxHeight = 'none';
         container.style.paddingBottom = '12px';
         host.style.height = 'auto';
         host.style.minHeight = '0';
-        host.style.overflowY = 'visible';
+        host.style.overflowY = 'hidden';
+        host.style.overflowX = 'visible';
         const dataList = host.querySelector('.data');
         if (dataList) {
-            dataList.style.overflow = 'visible';
+            dataList.style.overflowY = 'hidden';
+            dataList.style.overflowX = 'visible';
             dataList.style.maxHeight = 'none';
         }
         applyDecadeScale(host);
